@@ -262,47 +262,37 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 .hint-tts{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:1.5px solid rgba(109,40,217,.2);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;color:#9061f9;transition:all .15s}
 .hint-tts:hover,.hint-tts.playing{background:#ede9fe;border-color:#7c3aed;color:#7c3aed}
 
-/* ── RECORDING MODAL ── */
-.rec-overlay{position:fixed;inset:0;background:rgba(10,10,20,.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease-out}
-.rec-modal{background:var(--card);border-radius:20px;padding:24px 22px 20px;width:min(370px,92vw);box-shadow:0 24px 60px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:14px;animation:slideDown .25s cubic-bezier(.16,1,.3,1)}
-.rec-sentence{background:var(--bg);border-radius:12px;padding:12px 14px;border:1px solid var(--border)}
-.rec-rm{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px}
-.rec-jp{font-size:15px;font-weight:700;line-height:1.6;color:var(--fg)}
-.rec-zh{font-size:12px;color:var(--muted);margin-top:5px;padding-top:5px;border-top:1px solid var(--border)}
-.rec-viz{height:44px;background:var(--bg);border-radius:10px;border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:2px;padding:0 10px}
-.rec-bar{width:3px;border-radius:2px;background:var(--accent);height:6px;transition:height .08s ease;flex-shrink:0}
-.rec-status{font-size:11px;color:var(--muted);text-align:center;font-family:'Space Mono',monospace;letter-spacing:.04em;min-height:16px}
-.rec-controls{display:flex;gap:8px;align-items:center;justify-content:center}
-.rec-btn-main{width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;flex-shrink:0}
-.rec-btn-main.idle{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(192,57,43,.35)}
-.rec-btn-main.idle:hover{background:#a93226;transform:scale(1.06)}
-.rec-btn-main.recording{background:var(--red);color:#fff;animation:recPulse 1.2s infinite;box-shadow:0 0 0 0 rgba(192,57,43,.4)}
-.rec-btn-main.playback{background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(26,122,110,.3)}
-.rec-btn-main.playback:hover{background:#135d54;transform:scale(1.06)}
-@keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(192,57,43,.5)}70%{box-shadow:0 0 0 12px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
-.rec-btn-sm{height:34px;padding:0 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .2s;white-space:nowrap}
-.rec-btn-sm:hover{border-color:var(--fg);color:var(--fg)}
-.rec-btn-sm.danger:hover{border-color:var(--red);color:var(--red)}
-.rec-actions{display:flex;gap:8px}
-.rec-btn-send{flex:1;height:38px;background:var(--fg);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
-.rec-btn-send:hover{background:var(--accent)}
-.rec-btn-send:disabled{opacity:.4;cursor:not-allowed}
-.rec-btn-cancel{height:38px;padding:0 16px;background:none;color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s}
-.rec-btn-cancel:hover{border-color:var(--red);color:var(--red)}
+/* ── INLINE RECORDER (跟随消息气泡) ── */
+.inline-rec{margin-top:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;gap:7px;animation:fadeIn .22s ease-out;align-self:flex-end;max-width:88%}
+.irec-viz{height:32px;background:rgba(0,0,0,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:2px;padding:0 8px;overflow:hidden}
+.irec-bar{width:3px;border-radius:2px;background:rgba(255,255,255,.7);height:4px;transition:height .08s ease;flex-shrink:0}
+.irec-status{font-size:10px;color:rgba(255,255,255,.55);font-family:'Space Mono',monospace;letter-spacing:.03em;text-align:right}
+.irec-row{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.irec-btn{height:28px;padding:0 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;border:none;transition:all .18s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.irec-btn.rec-idle{background:rgba(192,57,43,.85);color:#fff}
+.irec-btn.rec-idle:hover{background:var(--red)}
+.irec-btn.rec-recording{background:var(--red);color:#fff;animation:recPulse 1.1s infinite}
+.irec-btn.rec-done{background:rgba(26,122,110,.85);color:#fff}
+.irec-btn.sec{background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2)}
+.irec-btn.sec:hover{background:rgba(255,255,255,.2);color:#fff}
+.irec-btn.send{background:#fff;color:var(--fg);font-weight:700}
+.irec-btn.send:hover{background:var(--accent-light);color:var(--accent)}
+.irec-btn:disabled{opacity:.35;cursor:not-allowed}
+@keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(192,57,43,.6)}70%{box-shadow:0 0 0 8px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
+
+/* ── USER MSG WITH RECORDING ── */
+.user-rec-btn{background:none;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,.75);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:all .15s}
+.user-rec-btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.1)}
+.user-rec-btn.playing{background:rgba(255,255,255,.2);border-color:#fff;color:#fff}
 
 /* ── VOICE DIALOG EXPORT ── */
-.voice-export-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:8px;display:none}
+.voice-export-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:none;align-items:center;gap:10px;margin-top:8px}
 .voice-export-bar.show{display:flex}
 .ve-label{font-size:12px;font-weight:600;color:var(--fg);flex:1}
 .ve-btn{height:32px;padding:0 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px}
 .ve-btn:hover{border-color:var(--accent);color:var(--accent)}
 .ve-btn.primary{background:var(--fg);color:#fff;border-color:var(--fg)}
 .ve-btn.primary:hover{background:var(--accent);border-color:var(--accent)}
-
-/* ── USER MSG WITH RECORDING ── */
-.user-rec-btn{background:none;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,.75);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:all .15s}
-.user-rec-btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.1)}
-.user-rec-btn.playing{background:rgba(255,255,255,.2);border-color:#fff;color:#fff}
 .toast-container{position:fixed;top:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:320px;width:calc(100% - 44px)}
 .toast{background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--border);padding:11px 15px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);display:flex;align-items:flex-start;gap:9px;transform:translateX(110%);opacity:0;transition:all .32s cubic-bezier(.16,1,.3,1)}
 .toast.show{transform:translateX(0);opacity:1}
@@ -499,30 +489,6 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 
 </div><!-- /immersive -->
 </div><!-- /wrap -->
-
-<!-- ── RECORDING MODAL ── -->
-<div id="recOverlay" class="rec-overlay" style="display:none" onclick="if(event.target===this)closeRecModal()">
-  <div class="rec-modal">
-    <div class="rec-sentence">
-      <div class="rec-rm" id="recRm"></div>
-      <div class="rec-jp" id="recJp"></div>
-      <div class="rec-zh" id="recZh"></div>
-    </div>
-    <div class="rec-viz" id="recViz">
-      <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">点击录音按钮开始</span>
-    </div>
-    <div class="rec-status" id="recStatus">准备录音</div>
-    <div class="rec-controls">
-      <button class="rec-btn-sm" id="recResetBtn" onclick="resetRec()" style="display:none">🔄 重录</button>
-      <button class="rec-btn-main idle" id="recMainBtn" onclick="toggleRec()">🎙</button>
-      <button class="rec-btn-sm" id="recPlayBtn" onclick="playRec()" style="display:none">▶ 试听</button>
-    </div>
-    <div class="rec-actions">
-      <button class="rec-btn-cancel" onclick="closeRecModal()">取消</button>
-      <button class="rec-btn-send" id="recSendBtn" disabled onclick="sendRec()">✓ 使用此录音发送</button>
-    </div>
-  </div>
-</div>
 
 <!-- ── VOICE EXPORT BAR ── -->
 <div style="max-width:1180px;margin:0 auto;padding:0 18px 20px">
@@ -1049,8 +1015,9 @@ function addUser(text){
   const jpEsc=escA(text);
   row.innerHTML=`<div class="msg-av">你</div><div class="msg-body"><div class="bubble"><div class="jp-line">${esc(text)}</div></div><div class="msg-actions"><button class="tts-btn user-tts" onclick="speak('${jpEsc}',this)">▶ 発音</button></div></div>`;
   area.appendChild(row);area.scrollTop=area.scrollHeight;
-  // 普通文字输入也记入语音轨道（用 TTS）
+  const trackIdx=VOICE_TRACK.length;
   VOICE_TRACK.push({type:'user-tts',text,blob:null,url:null});
+  attachInlineRec(row,trackIdx);
   if(VOICE_TRACK.length>0)document.getElementById('voiceExportBar').classList.add('show');
 }
 function renderQR(suggestions){
@@ -1060,15 +1027,12 @@ function renderQR(suggestions){
     const jp=typeof x==='string'?x:(x.jp||'');
     const rm=typeof x==='string'?'':(x.romaji||'');
     const zh=typeof x==='string'?'':(x.zh||'');
-    const jpEsc=escA(jp);const rmEsc=escA(rm);const zhEsc=escA(zh);
-    return `<div class="sugg-card" onclick="openRecModal('${jpEsc}','${rmEsc}','${zhEsc}')">
+    const jpEsc=escA(jp);
+    return `<div class="sugg-card" onclick="useQR('${jpEsc}')">
       ${rm?`<div class="sugg-rm">${esc(rm)}</div>`:''}
       <div class="sugg-jp">${esc(jp)}</div>
       ${zh?`<div class="sugg-zh">${esc(zh)}</div>`:''}
-      <div style="position:absolute;right:9px;top:50%;transform:translateY(-50%);display:flex;gap:5px;align-items:center">
-        <button class="sugg-tts" onclick="event.stopPropagation();speak('${jpEsc}',this)" title="TTS试听">▶</button>
-        <button class="sugg-tts" style="font-size:11px" onclick="event.stopPropagation();openRecModal('${jpEsc}','${rmEsc}','${zhEsc}')" title="录音">🎙</button>
-      </div>
+      <button class="sugg-tts" onclick="event.stopPropagation();speak('${jpEsc}',this)">▶</button>
     </div>`;
   }).join('')+'</div>';
 }
@@ -1178,179 +1142,187 @@ function getLocation(){
 // ══════════════════════════════════════════
 
 // ══════════════════════════════════════════
-//  VOICE RECORDING SYSTEM
+//  INLINE VOICE RECORDING SYSTEM
 // ══════════════════════════════════════════
-const REC={
-  mediaRecorder:null, chunks:[], blob:null,
-  audioURL:null, audioEl:null,
-  pending:{jp:'',romaji:'',zh:''},
-  vizAnim:null, stream:null,
-  state:'idle' // idle | recording | done
-};
-
-// 对话语音轨道 [{type:'ai'|'user', text, blob, url}]
 const VOICE_TRACK=[];
+const _recPlayers={};
+// 当前活跃的内联录音器 ID（同时只允许一个）
+let _activeIRec=null;
 
-function openRecModal(jp,romaji,zh){
-  REC.pending={jp,romaji,zh};
-  REC.blob=null;REC.audioURL=null;REC.chunks=[];REC.state='idle';
-  document.getElementById('recJp').textContent=jp;
-  document.getElementById('recRm').textContent=romaji||'';
-  document.getElementById('recZh').textContent=zh||'';
-  document.getElementById('recStatus').textContent='准备录音';
-  document.getElementById('recMainBtn').className='rec-btn-main idle';
-  document.getElementById('recMainBtn').textContent='🎙';
-  document.getElementById('recResetBtn').style.display='none';
-  document.getElementById('recPlayBtn').style.display='none';
-  document.getElementById('recSendBtn').disabled=true;
-  setVizIdle();
-  document.getElementById('recOverlay').style.display='flex';
-}
-function closeRecModal(){
-  stopRecording();
-  if(REC.vizAnim){cancelAnimationFrame(REC.vizAnim);REC.vizAnim=null;}
-  document.getElementById('recOverlay').style.display='none';
-}
-function setVizIdle(){
-  document.getElementById('recViz').innerHTML='<span style="font-size:11px;color:var(--muted);font-family:\'Space Mono\',monospace">点击录音按钮开始</span>';
-}
-function setVizBars(){
-  const viz=document.getElementById('recViz');
-  viz.innerHTML=Array.from({length:20},(_,i)=>`<div class="rec-bar" id="rb${i}"></div>`).join('');
+// 每条用户消息发送时，附加一个内联录音器
+function attachInlineRec(msgRow, trackIdx){
+  const rid='ir_'+Date.now()+'_'+trackIdx;
+  const recDiv=document.createElement('div');
+  recDiv.className='inline-rec';
+  recDiv.id=rid;
+  recDiv.dataset.state='idle'; // idle | recording | done
+  recDiv.dataset.trackIdx=trackIdx;
+  recDiv.innerHTML=`
+    <div class="irec-row">
+      <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:'Space Mono',monospace;flex:1">🎙 点击录音</span>
+      <button class="irec-btn rec-idle" id="${rid}_start" onclick="irecToggle('${rid}')">● 录音</button>
+    </div>
+    <div class="irec-viz" id="${rid}_viz" style="display:none"></div>
+    <div class="irec-row" id="${rid}_btns2" style="display:none">
+      <span class="irec-status" id="${rid}_status" style="flex:1"></span>
+      <button class="irec-btn sec" onclick="irecPlay('${rid}')">▶ 试听</button>
+      <button class="irec-btn sec" onclick="irecReset('${rid}')">🔄 重录</button>
+      <button class="irec-btn send" onclick="irecSave('${rid}')">✓ 保存</button>
+    </div>`;
+  // append after msg-body inside msg-row
+  msgRow.querySelector('.msg-body').appendChild(recDiv);
 }
 
-async function toggleRec(){
-  if(REC.state==='idle'||REC.state==='done'){
-    // start new recording
-    REC.chunks=[];REC.blob=null;REC.audioURL=null;REC.state='recording';
+// per-recorder state store
+const _irecState={};
+
+async function irecToggle(rid){
+  const s=_irecState[rid]||{state:'idle',chunks:[],blob:null,url:null,stream:null,mr:null,vizAnim:null,audioEl:null};
+  _irecState[rid]=s;
+
+  if(s.state==='idle'){
+    // stop any other active recorder first
+    if(_activeIRec&&_activeIRec!==rid) irecStop(_activeIRec);
+    _activeIRec=rid;
+    s.state='recording';s.chunks=[];s.blob=null;s.url=null;
+    const startBtn=document.getElementById(rid+'_start');
     try{
-      REC.stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      REC.mediaRecorder=new MediaRecorder(REC.stream);
-      REC.mediaRecorder.ondataavailable=e=>{if(e.data.size>0)REC.chunks.push(e.data);};
-      REC.mediaRecorder.onstop=finalizeRec;
-      REC.mediaRecorder.start(100);
-      document.getElementById('recMainBtn').className='rec-btn-main recording';
-      document.getElementById('recMainBtn').textContent='⏹';
-      document.getElementById('recStatus').textContent='● 录音中…';
-      document.getElementById('recResetBtn').style.display='none';
-      document.getElementById('recPlayBtn').style.display='none';
-      document.getElementById('recSendBtn').disabled=true;
-      setVizBars();
-      animateViz(REC.stream);
+      s.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      s.mr=new MediaRecorder(s.stream);
+      s.mr.ondataavailable=e=>{if(e.data.size>0)s.chunks.push(e.data);};
+      s.mr.onstop=()=>irecFinalize(rid);
+      s.mr.start(100);
+      startBtn.className='irec-btn rec-recording';startBtn.textContent='⏹ 停止';
+      // show viz
+      const viz=document.getElementById(rid+'_viz');viz.style.display='flex';
+      viz.innerHTML=Array.from({length:16},(_,i)=>`<div class="irec-bar" id="${rid}_rb${i}"></div>`).join('');
+      irecAnimViz(rid,s.stream);
     }catch(e){
-      REC.state='idle';
+      s.state='idle';_activeIRec=null;
       showToast('麦克风权限','请允许浏览器访问麦克风','error');
     }
-  } else if(REC.state==='recording'){
-    stopRecording();
+  }else if(s.state==='recording'){
+    irecStop(rid);
   }
-}
-function stopRecording(){
-  if(REC.mediaRecorder&&REC.mediaRecorder.state!=='inactive'){
-    REC.mediaRecorder.stop();
-  }
-  if(REC.stream){REC.stream.getTracks().forEach(t=>t.stop());REC.stream=null;}
-  if(REC.vizAnim){cancelAnimationFrame(REC.vizAnim);REC.vizAnim=null;}
-}
-function finalizeRec(){
-  REC.state='done';
-  REC.blob=new Blob(REC.chunks,{type:'audio/webm'});
-  REC.audioURL=URL.createObjectURL(REC.blob);
-  document.getElementById('recMainBtn').className='rec-btn-main playback';
-  document.getElementById('recMainBtn').textContent='🎙';
-  document.getElementById('recStatus').textContent='录音完成 — 可试听或重录';
-  document.getElementById('recResetBtn').style.display='';
-  document.getElementById('recPlayBtn').style.display='';
-  document.getElementById('recSendBtn').disabled=false;
-  // show waveform placeholder
-  document.getElementById('recViz').innerHTML='<span style="font-size:11px;color:var(--accent);font-family:\'Space Mono\',monospace">✓ 录音完成</span>';
-}
-function resetRec(){
-  stopRecording();
-  REC.state='idle';REC.blob=null;REC.audioURL=null;REC.chunks=[];
-  document.getElementById('recMainBtn').className='rec-btn-main idle';
-  document.getElementById('recMainBtn').textContent='🎙';
-  document.getElementById('recStatus').textContent='准备重新录音';
-  document.getElementById('recResetBtn').style.display='none';
-  document.getElementById('recPlayBtn').style.display='none';
-  document.getElementById('recSendBtn').disabled=true;
-  setVizIdle();
-}
-function playRec(){
-  if(!REC.audioURL)return;
-  const btn=document.getElementById('recPlayBtn');
-  if(REC.audioEl){REC.audioEl.pause();REC.audioEl=null;btn.textContent='▶ 试听';return;}
-  REC.audioEl=new Audio(REC.audioURL);
-  btn.textContent='⏹ 停止';
-  REC.audioEl.play();
-  REC.audioEl.onended=()=>{btn.textContent='▶ 试听';REC.audioEl=null;};
-}
-function animateViz(stream){
-  const ctx=new (window.AudioContext||window.webkitAudioContext)();
-  const src=ctx.createMediaStreamSource(stream);
-  const analyser=ctx.createAnalyser();analyser.fftSize=64;
-  src.connect(analyser);
-  const data=new Uint8Array(analyser.frequencyBinCount);
-  function draw(){
-    if(REC.state!=='recording')return;
-    REC.vizAnim=requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(data);
-    for(let i=0;i<20;i++){
-      const b=document.getElementById('rb'+i);
-      if(b){const v=data[i]||0;b.style.height=Math.max(4,v/4)+'px';}
-    }
-  }
-  draw();
 }
 
-async function sendRec(){
-  if(!REC.blob)return;
-  const {jp,romaji,zh}=REC.pending;
-  closeRecModal();
-  // store blob for voice track
-  const url=REC.audioURL||URL.createObjectURL(REC.blob);
-  const blobCopy=REC.blob;
-  // add to chat as user message with recording
-  addUserWithRec(jp,url,blobCopy);
-  VOICE_TRACK.push({type:'user',text:jp,blob:blobCopy,url});
-  // send to AI
-  S.msgs.push({role:'user',parts:[{text:jp}]});
-  S.loading=true;document.getElementById('sendBtn').disabled=true;showTyping();
-  document.getElementById('qrArea').innerHTML='';
-  document.getElementById('nextHintPanel').innerHTML='';
-  if(!activeKey()){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;addErrorMsg('APIキーが未設定です','请先配置 API Key。');return;}
+function irecStop(rid){
+  const s=_irecState[rid];if(!s)return;
+  if(s.mr&&s.mr.state!=='inactive')s.mr.stop();
+  if(s.stream){s.stream.getTracks().forEach(t=>t.stop());s.stream=null;}
+  if(s.vizAnim){cancelAnimationFrame(s.vizAnim);s.vizAnim=null;}
+  if(_activeIRec===rid)_activeIRec=null;
+}
+
+function irecFinalize(rid){
+  const s=_irecState[rid];if(!s)return;
+  s.state='done';
+  s.blob=new Blob(s.chunks,{type:'audio/webm'});
+  s.url=URL.createObjectURL(s.blob);
+  const startBtn=document.getElementById(rid+'_start');
+  const btns2=document.getElementById(rid+'_btns2');
+  const viz=document.getElementById(rid+'_viz');
+  const status=document.getElementById(rid+'_status');
+  startBtn.style.display='none';
+  viz.innerHTML=`<span style="font-size:10px;color:rgba(255,255,255,.7);font-family:'Space Mono',monospace">✓ 录音完成</span>`;
+  status.textContent='';
+  btns2.style.display='flex';
+}
+
+function irecReset(rid){
+  irecStop(rid);
+  const s=_irecState[rid];if(s){s.state='idle';s.blob=null;s.url=null;s.chunks=[];}
+  const startBtn=document.getElementById(rid+'_start');
+  const btns2=document.getElementById(rid+'_btns2');
+  const viz=document.getElementById(rid+'_viz');
+  startBtn.className='irec-btn rec-idle';startBtn.textContent='● 录音';startBtn.style.display='';
+  viz.style.display='none';viz.innerHTML='';
+  btns2.style.display='none';
+  // also update voice track to no recording
+  const trackIdx=parseInt(document.getElementById(rid)?.dataset.trackIdx);
+  if(!isNaN(trackIdx)&&VOICE_TRACK[trackIdx]){VOICE_TRACK[trackIdx].blob=null;VOICE_TRACK[trackIdx].url=null;}
+}
+
+function irecPlay(rid){
+  const s=_irecState[rid];if(!s||!s.url)return;
+  const playBtn=document.getElementById(rid+'_btns2')?.querySelector('.irec-btn.sec');
+  if(s.audioEl){s.audioEl.pause();s.audioEl=null;if(playBtn)playBtn.textContent='▶ 试听';return;}
+  s.audioEl=new Audio(s.url);
+  if(playBtn)playBtn.textContent='⏹ 停止';
+  s.audioEl.play();
+  s.audioEl.onended=()=>{s.audioEl=null;if(playBtn)playBtn.textContent='▶ 试听';};
+}
+
+function irecSave(rid){
+  const s=_irecState[rid];if(!s||!s.blob)return;
+  const trackIdx=parseInt(document.getElementById(rid)?.dataset.trackIdx);
+  if(!isNaN(trackIdx)&&VOICE_TRACK[trackIdx]){
+    VOICE_TRACK[trackIdx].blob=s.blob;
+    VOICE_TRACK[trackIdx].url=s.url;
+  }
+  // update UI to show saved state
+  const recDiv=document.getElementById(rid);
+  if(recDiv){
+    recDiv.innerHTML=`<div class="irec-row" style="justify-content:flex-end;gap:6px">
+      <span style="font-size:10px;color:rgba(255,255,255,.55);font-family:'Space Mono',monospace">🎙 已录音</span>
+      <button class="irec-btn sec" onclick="irecPlaySaved('${rid}')">▶ 回放</button>
+      <button class="irec-btn sec" onclick="irecReopen('${rid}')">🔄 重录</button>
+    </div>`;
+  }
+  document.getElementById('voiceExportBar').classList.add('show');
+}
+
+function irecPlaySaved(rid){
+  const s=_irecState[rid];if(!s||!s.url)return;
+  const btn=document.getElementById(rid)?.querySelector('.irec-btn.sec');
+  if(s.audioEl){s.audioEl.pause();s.audioEl=null;if(btn)btn.textContent='▶ 回放';return;}
+  s.audioEl=new Audio(s.url);
+  if(btn)btn.textContent='⏹ 停止';
+  s.audioEl.play();
+  s.audioEl.onended=()=>{s.audioEl=null;if(btn)btn.textContent='▶ 回放';};
+}
+
+function irecReopen(rid){
+  const s=_irecState[rid];if(!s)return;
+  s.state='idle';s.audioEl=null;
+  const recDiv=document.getElementById(rid);
+  if(recDiv){
+    recDiv.innerHTML=`
+      <div class="irec-row">
+        <span style="font-size:10px;color:rgba(255,255,255,.5);font-family:'Space Mono',monospace;flex:1">🎙 重新录音</span>
+        <button class="irec-btn rec-idle" id="${rid}_start" onclick="irecToggle('${rid}')">● 录音</button>
+      </div>
+      <div class="irec-viz" id="${rid}_viz" style="display:none"></div>
+      <div class="irec-row" id="${rid}_btns2" style="display:none">
+        <span class="irec-status" id="${rid}_status" style="flex:1"></span>
+        <button class="irec-btn sec" onclick="irecPlay('${rid}')">▶ 试听</button>
+        <button class="irec-btn sec" onclick="irecReset('${rid}')">🔄 重录</button>
+        <button class="irec-btn send" onclick="irecSave('${rid}')">✓ 保存</button>
+      </div>`;
+  }
+}
+
+function irecAnimViz(rid,stream){
+  const s=_irecState[rid];if(!s)return;
   try{
-    const hist=S.msgs.slice(-14);let start=0;while(start<hist.length&&hist[start].role!=='user')start++;
-    const txt=await callAI(hist.slice(start),'chat');
-    removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;
-    if(txt){const d=parse(txt);addAI(d);S.msgs.push({role:'model',parts:[{text:txt}]});}
-  }catch(e){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;console.error(e);}
-}
-function addUserWithRec(text,url,blob){
-  const area=document.getElementById('msgs'),row=document.createElement('div');
-  row.className='msg-row user';
-  const jpEsc=escA(text);
-  const recId='urec_'+Date.now();
-  row.innerHTML=`<div class="msg-av">你</div><div class="msg-body"><div class="bubble"><div class="jp-line">${esc(text)}</div></div><div class="msg-actions"><button class="tts-btn user-tts" onclick="speak('${jpEsc}',this)">▶ TTS</button><button class="user-rec-btn" id="${recId}" onclick="playUserRec('${recId}','${escA(url)}')">🎙 我的录音</button></div></div>`;
-  area.appendChild(row);area.scrollTop=area.scrollHeight;
-  // store url on element for playback
-  row.dataset.recUrl=url;
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const src=ctx.createMediaStreamSource(stream);
+    const analyser=ctx.createAnalyser();analyser.fftSize=64;
+    src.connect(analyser);
+    const data=new Uint8Array(analyser.frequencyBinCount);
+    function draw(){
+      if(!s||s.state!=='recording')return;
+      s.vizAnim=requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(data);
+      for(let i=0;i<16;i++){
+        const b=document.getElementById(rid+'_rb'+i);
+        if(b){b.style.height=Math.max(3,data[i]/5)+'px';}
+      }
+    }
+    draw();
+  }catch(e){console.warn('viz:',e);}
 }
 
-// store audio elements per rec button
-const _recPlayers={};
-function playUserRec(btnId,url){
-  const btn=document.getElementById(btnId);
-  if(_recPlayers[btnId]){
-    _recPlayers[btnId].pause();_recPlayers[btnId].currentTime=0;
-    delete _recPlayers[btnId];btn.textContent='🎙 我的录音';btn.classList.remove('playing');
-    return;
-  }
-  const a=new Audio(url);_recPlayers[btnId]=a;
-  btn.textContent='⏹ 停止';btn.classList.add('playing');
-  a.play();
-  a.onended=()=>{delete _recPlayers[btnId];btn.textContent='🎙 我的录音';btn.classList.remove('playing');};
-}
 
 
 // ══════════════════════════════════════════
