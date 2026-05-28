@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>日本語会話 AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f4ef;--fg:#1a1a2e;--muted:#7a7a8c;
+  --accent:#1a7a6e;--accent-light:#e0f5f3;--accent-mid:rgba(26,122,110,0.15);
+  --card:#fff;--border:rgba(26,26,46,0.08);--border-mid:rgba(26,26,46,0.12);
+  --red:#c0392b;--red-light:#fdf2f2;
+  --groq:#f97316;--groq-light:#fff7ed;
+  --radius:16px;
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px 60px}
+
+/* ── HEADER ── */
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 14px;border-bottom:1px solid var(--border);margin-bottom:16px;position:sticky;top:0;background:var(--bg);z-index:200}
+.logo-jp{font-size:18px;font-weight:700}
+.logo-en{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.12em;margin-left:8px}
+.header-actions{display:flex;align-items:center;gap:8px}
+.geo-btn{font-size:12px;color:var(--muted);background:#edeae3;border-radius:20px;padding:6px 13px;border:1px solid var(--border);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .2s}
+.geo-btn:hover{background:#e2ded4;transform:translateY(-1px)}
+.gdot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:all .3s}
+.gdot.on{background:var(--accent);box-shadow:0 0 0 3px var(--accent-mid)}
+/* ── LANG MODE TOGGLE ── */
+.lang-toggle{display:flex;align-items:center;border:1.5px solid var(--border-mid);border-radius:20px;overflow:hidden;background:var(--bg);flex-shrink:0}
+.lang-btn{font-family:'Space Mono',monospace;font-size:10px;padding:5px 11px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-weight:700;letter-spacing:.04em;transition:all .2s;white-space:nowrap}
+.lang-btn.active{background:var(--fg);color:#fff;border-radius:18px}
+
+/* ── API KEY BAR ── */
+.key-bar{background:var(--card);border:1.5px solid var(--border-mid);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;flex-direction:column;gap:9px;box-shadow:0 2px 8px rgba(0,0,0,0.03)}
+.key-bar-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.key-provider-tabs{display:flex;gap:5px;flex-shrink:0}
+.kp-tab{font-family:'Space Mono',monospace;font-size:10px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;letter-spacing:.04em;font-weight:700;transition:all .2s;white-space:nowrap}
+.kp-tab.active-gemini{background:#1a1a2e;color:#fff;border-color:#1a1a2e}
+.kp-tab.active-groq{background:var(--groq);color:#fff;border-color:var(--groq)}
+.key-hint{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;padding:5px 10px;background:var(--bg);border-radius:8px;border:1px dashed var(--border-mid);line-height:1.6}
+.key-hint a{color:var(--accent);text-decoration:none}
+.key-hint a:hover{text-decoration:underline}
+.key-bar input{flex:1;min-width:160px;height:36px;border-radius:9px;border:1px solid var(--border-mid);padding:0 12px;font-size:13px;font-family:monospace;background:var(--bg);color:var(--fg);outline:none;transition:all .2s}
+.key-bar input:focus{border-color:var(--accent);background:var(--card)}
+.key-bar input::placeholder{color:#bbb}
+.btn-save{height:36px;padding:0 16px;background:var(--fg);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .2s}
+.btn-save:hover{background:var(--accent)}
+.key-status{font-size:12px;white-space:nowrap;font-weight:500}
+
+/* ── LOC CARD ── */
+.loc-card{background:var(--accent-light);border:1px solid rgba(26,122,110,0.2);border-radius:12px;padding:10px 16px;margin-bottom:12px;display:none;align-items:center;gap:12px;animation:slideDown .3s cubic-bezier(.16,1,.3,1)}
+.loc-card.show{display:flex}
+.loc-name{font-size:14px;font-weight:500;color:var(--accent)}
+.loc-hint{font-size:12px;color:var(--muted);margin-top:1px}
+.loc-use{font-size:12px;padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:20px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .2s}
+.loc-use:hover{background:#135d54}
+
+/* ── SCENE TOOLBAR ── */
+.scene-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.sec-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.kw-row{display:flex;gap:7px;flex:1;min-width:220px}
+.kw-row input{flex:1;height:38px;border-radius:10px;padding:0 13px;border:1px solid var(--border);background:var(--card);font-size:13px;font-family:inherit;color:var(--fg);outline:none;transition:all .2s}
+.kw-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-mid)}
+.kw-row input::placeholder{color:#bbb}
+.btn-gen{height:38px;padding:0 16px;background:var(--fg);color:var(--bg);border:none;border-radius:10px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px}
+.btn-gen:hover{background:#2d2d4e}
+.btn-gen:disabled{opacity:.45;cursor:not-allowed}
+.btn-random{height:38px;padding:0 16px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-random:hover{background:linear-gradient(135deg,#6d28d9,#5b21b6);transform:translateY(-1px);box-shadow:0 4px 12px rgba(109,40,217,0.25)}
+.btn-random:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── CATS ── */
+.cat-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.cat-tab{font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:4px}
+.cat-tab:hover{border-color:var(--fg)}
+.cat-tab.active{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.cat-tab.ti-tab{background:linear-gradient(135deg,#1a1a2e,#2d1a4e);color:#f0c040;border-color:#3d2a6e;font-weight:700}
+.cat-tab.ti-tab.active{background:#f0c040;color:var(--fg);border-color:#f0c040}
+
+/* ── SCENE GRID (collapsible) ── */
+.scene-section{margin-bottom:14px}
+.scene-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.scene-toggle{font-size:11px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:20px;padding:3px 10px;cursor:pointer;font-family:inherit;transition:all .2s}
+.scene-toggle:hover{border-color:var(--fg);color:var(--fg)}
+.scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:6px;transition:all .3s}
+.scene-grid.collapsed{display:none}
+.scene-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 12px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;gap:3px}
+.scene-card:hover{border-color:rgba(26,26,46,.22);background:#edeae3;transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,.04)}
+.scene-card.active{border:1.5px solid var(--accent);background:var(--accent-light)}
+.sc-icon{font-size:18px;margin-bottom:2px}
+.sc-name{font-size:12px;font-weight:600;line-height:1.3}
+.sc-sub{font-size:10px;color:var(--muted);line-height:1.3}
+.scene-card.active .sc-name{color:var(--accent)}
+.ti-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;margin-bottom:2px;font-family:'Space Mono',monospace}
+.bg{background:#e8f0fe;color:#1a56c4}.be{background:#fff3e0;color:#b45309}
+.bn{background:#e8f5e9;color:#2e7d32}.bs{background:#f3e8ff;color:#6b21a8}
+.scene-card.be{border-left:3px solid #b45309}.scene-card.bn{border-left:3px solid #2e7d32}
+.scene-card.bs{border-left:3px solid #6b21a8}.scene-card.bg{border-left:3px solid #1a56c4}
+.ti-sec{grid-column:1/-1;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:6px 0 5px;border-bottom:1px solid var(--border);margin-bottom:3px}
+/* ── 场景二级布局新增 ── */
+.scene-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr))}
+.scene-card{flex-direction:row;align-items:center;gap:8px;padding:9px 11px}
+.sc-icon{font-size:16px;flex-shrink:0;margin-bottom:0}
+.sc-text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.sc-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-rand-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.cat-rand-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:1.5px solid rgba(109,40,217,.22);background:#f5f3ff;color:#7c3aed;cursor:pointer;font-family:inherit;font-weight:600;transition:all .2s;white-space:nowrap}
+.cat-rand-btn:hover{background:#ede9fe;border-color:#7c3aed}
+
+/* ══════════════════════════════════════════
+   IMMERSIVE LAYOUT  —  主对话 + 右侧助教
+══════════════════════════════════════════ */
+.immersive{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+@media(max-width:900px){.immersive{grid-template-columns:1fr}}
+
+/* ── LEFT COLUMN ── */
+.left-col{display:flex;flex-direction:column;gap:14px}
+
+/* ── 场景摘要条 ── */
+.scene-summary{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:none;animation:slideDown .3s ease-out}
+.scene-summary.show{display:block}
+.ss-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ss-av{width:38px;height:38px;border-radius:50%;background:var(--fg);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.ss-meta{flex:1}
+.ss-title{font-size:15px;font-weight:700;line-height:1.3}
+.ss-role{font-size:12px;color:var(--muted);margin-top:2px}
+.ss-actions{display:flex;align-items:center;gap:6px}
+.ss-btn{height:30px;padding:0 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-size:11px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:all .2s}
+.ss-btn:hover{border-color:var(--fg);color:var(--fg)}
+.ss-btn.danger:hover{border-color:var(--red);color:var(--red)}
+.ss-ctx{font-size:12px;color:var(--muted);line-height:1.7;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border)}
+.ss-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.ss-tag{font-size:10px;padding:3px 10px;border-radius:20px;background:var(--accent-light);color:var(--accent);font-weight:500;border:1px solid rgba(26,122,110,.2)}
+
+/* ── CHAT BOX ── */
+.chat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.04);display:flex;flex-direction:column;height:560px}
+.chat-head{background:var(--fg);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ch-av{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.ch-title{font-size:13px;font-weight:500;color:#fff}
+.ch-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
+.reset-btn{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.reset-btn:hover{background:rgba(255,255,255,.2);transform:rotate(-45deg)}
+.msgs{padding:16px;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── MESSAGES ── */
+.msg-row{display:flex;gap:8px;animation:fadeIn .28s ease-out}
+.msg-row.user{flex-direction:row-reverse}
+.msg-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.msg-row.ai .msg-av{background:var(--fg);color:#fff}
+.msg-row.user .msg-av{background:#fde8e6;color:var(--red)}
+.msg-body{max-width:88%;display:flex;flex-direction:column;gap:3px}
+.msg-row.user .msg-body{align-items:flex-end}
+.bubble{border-radius:4px 14px 14px 14px;padding:9px 13px;border:1px solid var(--border);white-space:pre-wrap;word-break:break-word}
+.msg-row.ai .bubble{background:var(--bg)}
+.msg-row.user .bubble{background:var(--fg);color:#fff;border-radius:14px 4px 14px 14px;border-color:var(--fg)}
+.rm-line{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:3px;line-height:1.5}
+.msg-row.user .rm-line{color:rgba(255,255,255,.5)}
+.jp-line{font-size:14px;line-height:1.75}
+.zh-line{font-size:12px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);line-height:1.6}
+.msg-row.user .zh-line{color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.2)}
+.msg-actions{display:flex;gap:5px;margin-top:3px}
+.msg-row.user .msg-actions{justify-content:flex-end}
+.tts-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:all .15s}
+.tts-btn:hover{border-color:var(--accent);color:var(--accent)}
+.tts-btn.playing{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.tts-btn.user-tts{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.75);background:rgba(255,255,255,.06)}
+.tts-btn.user-tts:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.14)}
+.tts-btn.user-tts.playing{border-color:#fff;color:#fff;background:rgba(255,255,255,.2)}
+
+/* ── TYPING ── */
+.typing{display:flex;gap:5px;align-items:center;padding:4px 0}
+.tdot{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:pulse 1.2s infinite}
+.tdot:nth-child(2){animation-delay:.2s}.tdot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+/* ── INPUT AREA ── */
+.input-area{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;background:#edeae3;flex-shrink:0}
+.input-area textarea{flex:1;min-height:40px;max-height:110px;padding:9px 13px;border:1px solid var(--border);border-radius:12px;background:var(--card);font-size:13px;font-family:inherit;color:var(--fg);resize:none;line-height:1.5;outline:none;transition:border-color .2s}
+.input-area textarea:focus{border-color:var(--accent)}
+.input-area textarea::placeholder{color:#bbb}
+.send-btn{width:40px;height:40px;border-radius:50%;background:var(--fg);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;transition:all .2s}
+.send-btn:hover{background:var(--accent);transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:50px 20px;color:var(--muted);text-align:center;margin:auto}
+.empty .em{font-size:40px;opacity:.15}
+.empty p{font-size:13px;line-height:1.8}
+
+/* ── BOTTOM ROW (词汇 + 设置 横排) ── */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.bottom-row{grid-template-columns:1fr}}
+
+/* ── VOCAB PANEL (bottom-left) ── */
+.vocab-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.03);display:none}
+.vocab-panel.show{display:block}
+.vocab-head{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.vocab-head-lbl{font-size:11px;font-weight:700;color:var(--fg);opacity:.65;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
+.vocab-count-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:20px;border:1px solid var(--border)}
+.vocab-list{padding:8px 12px;display:flex;flex-direction:column;gap:0;max-height:220px;overflow-y:auto}
+.vocab-item{display:flex;align-items:center;padding:8px 6px;border-bottom:1px solid rgba(26,26,46,.05)}
+.vocab-item:last-child{border-bottom:none}
+.vocab-item-inner{display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:10px;flex:1}
+.v-jp{font-size:16px;font-weight:700;grid-row:1/3;align-self:center;color:var(--fg)}
+.v-rm{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.03em;line-height:1.5}
+.v-zh{font-size:12px;color:#5a5a6c;line-height:1.4}
+.v-tts{background:none;border:1.5px solid var(--border);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0;margin-left:8px}
+.v-tts:hover,.v-tts.playing{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* ── SETTINGS PANEL (bottom-right) ── */
+.settings-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.03)}
+.settings-head{font-size:11px;font-weight:700;color:var(--fg);opacity:.65;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:5px}
+.provider-status{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:8px;font-size:11px;font-family:'Space Mono',monospace;margin-bottom:10px}
+.provider-status.gemini-mode{background:#e8f0fe;color:#1a56c4}
+.provider-status.groq-mode{background:var(--groq-light);color:var(--groq)}
+.provider-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.lvl-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.lvl-row span{color:var(--muted);font-weight:500}
+.lvl-sel{border:1.5px solid var(--border-mid);border-radius:8px;padding:4px 9px;font-size:12px;font-family:inherit;background:var(--bg);color:var(--fg);outline:none;cursor:pointer;font-weight:500}
+.lvl-sel:focus{border-color:var(--accent)}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.toggle{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:11.5px;color:var(--muted);transition:all .2s;user-select:none;font-weight:500}
+.toggle.on{background:var(--accent-light);border-color:rgba(26,122,110,.28);color:var(--accent)}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(26,26,46,.18);flex-shrink:0;transition:background .2s}
+.toggle.on .dot{background:var(--accent)}
+
+/* ── RIGHT COLUMN (助教) ── */
+.right-col{display:flex;flex-direction:column;gap:12px;position:sticky;top:64px;height:calc(100vh - 80px);overflow:hidden}
+
+/* ── COACH BOX ── */
+.coach-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 2px 10px rgba(0,0,0,.03);display:flex;flex-direction:column;overflow:hidden}
+.coach-box:nth-child(1){flex:1 1 0;min-height:0}
+.coach-box:nth-child(2){flex:1 1 0;min-height:0}
+.coach-title{font-size:11px;font-weight:700;color:var(--fg);padding:13px 14px 11px;display:flex;align-items:center;gap:5px;letter-spacing:.04em;text-transform:uppercase;opacity:.65;flex-shrink:0;border-bottom:1px solid var(--border)}
+.panel-icon{font-size:13px;opacity:1}
+.coach-inner{flex:1;overflow-y:auto;padding:12px;min-height:0}
+.coach-inner::-webkit-scrollbar{width:3px}
+.coach-inner::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.qr-placeholder{font-size:12px;color:#b0b0be;text-align:center;padding:20px 10px;border:1px dashed rgba(26,26,46,.1);border-radius:10px;background:#faf9f6;line-height:1.7;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px}
+
+/* ── SUGGESTION CARDS ── */
+.sugg-list{display:flex;flex-direction:column;gap:7px}
+.sugg-card{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:10px 42px 10px 12px;cursor:pointer;transition:all .2s;position:relative;animation:fadeIn .25s ease-out}
+.sugg-card:hover{border-color:var(--accent);background:var(--accent-light);transform:translateX(2px)}
+.sugg-rm{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);line-height:1.5;margin-bottom:2px;letter-spacing:.02em}
+.sugg-card:hover .sugg-rm{color:rgba(26,122,110,.7)}
+.sugg-jp{font-size:13px;font-weight:600;line-height:1.6;color:var(--fg)}
+.sugg-zh{font-size:11px;color:var(--muted);line-height:1.5;margin-top:4px;padding-top:4px;border-top:1px solid rgba(26,26,46,.07)}
+.sugg-card:hover .sugg-zh{color:rgba(26,122,110,.75);border-top-color:rgba(26,122,110,.12)}
+.sugg-tts{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:1.5px solid var(--border);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;color:var(--muted);transition:all .15s}
+.sugg-tts:hover,.sugg-tts.playing{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* ── NEXT HINT CARDS ── */
+.hint-list{display:flex;flex-direction:column;gap:7px}
+.hint-card{background:#f9f7ff;border:1.5px solid rgba(109,40,217,.1);border-radius:12px;padding:10px 42px 10px 12px;position:relative;animation:fadeIn .25s ease-out}
+.hint-rm{font-family:'Space Mono',monospace;font-size:10px;color:#9061f9;line-height:1.5;margin-bottom:2px}
+.hint-jp{font-size:13px;font-weight:600;line-height:1.6;color:var(--fg)}
+.hint-zh{font-size:11px;color:var(--muted);line-height:1.5;margin-top:4px;padding-top:4px;border-top:1px solid rgba(109,40,217,.1)}
+.hint-tts{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:1.5px solid rgba(109,40,217,.2);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;color:#9061f9;transition:all .15s}
+.hint-tts:hover,.hint-tts.playing{background:#ede9fe;border-color:#7c3aed;color:#7c3aed}
+
+/* ── RECORDING MODAL ── */
+.rec-overlay{position:fixed;inset:0;background:rgba(10,10,20,.55);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease-out}
+.rec-modal{background:var(--card);border-radius:20px;padding:24px 22px 20px;width:min(370px,92vw);box-shadow:0 24px 60px rgba(0,0,0,.18);display:flex;flex-direction:column;gap:14px;animation:slideDown .25s cubic-bezier(.16,1,.3,1)}
+.rec-sentence{background:var(--bg);border-radius:12px;padding:12px 14px;border:1px solid var(--border)}
+.rec-rm{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px}
+.rec-jp{font-size:15px;font-weight:700;line-height:1.6;color:var(--fg)}
+.rec-zh{font-size:12px;color:var(--muted);margin-top:5px;padding-top:5px;border-top:1px solid var(--border)}
+.rec-viz{height:44px;background:var(--bg);border-radius:10px;border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;gap:2px;padding:0 10px}
+.rec-bar{width:3px;border-radius:2px;background:var(--accent);height:6px;transition:height .08s ease;flex-shrink:0}
+.rec-status{font-size:11px;color:var(--muted);text-align:center;font-family:'Space Mono',monospace;letter-spacing:.04em;min-height:16px}
+.rec-controls{display:flex;gap:8px;align-items:center;justify-content:center}
+.rec-btn-main{width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;flex-shrink:0}
+.rec-btn-main.idle{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(192,57,43,.35)}
+.rec-btn-main.idle:hover{background:#a93226;transform:scale(1.06)}
+.rec-btn-main.recording{background:var(--red);color:#fff;animation:recPulse 1.2s infinite;box-shadow:0 0 0 0 rgba(192,57,43,.4)}
+.rec-btn-main.playback{background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(26,122,110,.3)}
+.rec-btn-main.playback:hover{background:#135d54;transform:scale(1.06)}
+@keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(192,57,43,.5)}70%{box-shadow:0 0 0 12px rgba(192,57,43,0)}100%{box-shadow:0 0 0 0 rgba(192,57,43,0)}}
+.rec-btn-sm{height:34px;padding:0 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .2s;white-space:nowrap}
+.rec-btn-sm:hover{border-color:var(--fg);color:var(--fg)}
+.rec-btn-sm.danger:hover{border-color:var(--red);color:var(--red)}
+.rec-actions{display:flex;gap:8px}
+.rec-btn-send{flex:1;height:38px;background:var(--fg);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.rec-btn-send:hover{background:var(--accent)}
+.rec-btn-send:disabled{opacity:.4;cursor:not-allowed}
+.rec-btn-cancel{height:38px;padding:0 16px;background:none;color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s}
+.rec-btn-cancel:hover{border-color:var(--red);color:var(--red)}
+
+/* ── VOICE DIALOG EXPORT ── */
+.voice-export-bar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:8px;display:none}
+.voice-export-bar.show{display:flex}
+.ve-label{font-size:12px;font-weight:600;color:var(--fg);flex:1}
+.ve-btn{height:32px;padding:0 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:5px}
+.ve-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ve-btn.primary{background:var(--fg);color:#fff;border-color:var(--fg)}
+.ve-btn.primary:hover{background:var(--accent);border-color:var(--accent)}
+
+/* ── USER MSG WITH RECORDING ── */
+.user-rec-btn{background:none;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,.75);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:all .15s}
+.user-rec-btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.1)}
+.user-rec-btn.playing{background:rgba(255,255,255,.2);border-color:#fff;color:#fff}
+.toast-container{position:fixed;top:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:320px;width:calc(100% - 44px)}
+.toast{background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--border);padding:11px 15px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);display:flex;align-items:flex-start;gap:9px;transform:translateX(110%);opacity:0;transition:all .32s cubic-bezier(.16,1,.3,1)}
+.toast.show{transform:translateX(0);opacity:1}
+.toast-icon{font-size:14px;line-height:1}
+.toast-content{flex:1}
+.toast-title{font-weight:700;font-size:12px;color:var(--fg);margin-bottom:2px}
+.toast-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.toast.success{border-left:3px solid var(--accent)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid #3b82f6}
+
+@keyframes slideDown{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:500px){
+  .scene-grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr))}
+  .toast-container{right:14px;top:auto;bottom:14px}
+  .bottom-row{grid-template-columns:1fr}
+  .immersive{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ── HEADER ── -->
+<header>
+  <div>
+    <span class="logo-jp">日本語会話 AI</span>
+    <span class="logo-en">CONVERSATION PRACTICE</span>
+  </div>
+  <div class="header-actions">
+    <div class="lang-toggle" id="langToggle" title="切换母语辅助语言">
+      <button class="lang-btn active" id="langZh" onclick="setLangMode('zh')">中日</button>
+      <button class="lang-btn" id="langEn" onclick="setLangMode('en')">英日</button>
+    </div>
+    <button class="geo-btn" onclick="getLocation()">
+      <span class="gdot" id="gdot"></span>
+      <span id="geoLbl">位置を取得</span>
+    </button>
+  </div>
+</header>
+
+<!-- ── API KEY BAR ── -->
+<div class="key-bar">
+  <div class="key-bar-row">
+    <div class="key-provider-tabs">
+      <button class="kp-tab active-gemini" id="tabGemini" onclick="switchProvider('gemini')">🔵 GEMINI</button>
+      <button class="kp-tab" id="tabGroq" onclick="switchProvider('groq')">🟠 GROQ</button>
+    </div>
+    <input id="kInput" type="text" placeholder="粘贴 API Key，点保存永久记住"/>
+    <span class="key-status" id="kStatus">⚠️ 未设置</span>
+    <button class="btn-save" onclick="saveKey()">保存</button>
+  </div>
+  <div class="key-hint" id="keyHint">
+    🔵 Gemini Key：<a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a> 免费版每分钟15次 &nbsp;｜&nbsp;
+    🟠 Groq Key：<a href="https://console.groq.com/keys" target="_blank">console.groq.com</a> 完全免费 · 速度极快
+  </div>
+</div>
+
+<!-- ── LOC CARD ── -->
+<div class="loc-card" id="locCard">
+  <div style="font-size:18px">📍</div>
+  <div style="flex:1">
+    <div class="loc-name" id="locName">—</div>
+    <div class="loc-hint" id="locHint">检测到位置，推荐对话场景</div>
+  </div>
+  <button class="loc-use" id="locUseBtn">用此场景</button>
+</div>
+
+<!-- ── SCENE TOOLBAR ── -->
+<div class="scene-toolbar">
+  <span class="sec-lbl">生成场景</span>
+  <div class="kw-row">
+    <input type="text" id="kwInput" placeholder="输入关键词，例如：美容院、引越し、婚活パーティー…"/>
+    <button class="btn-gen" id="genBtn" onclick="generateScene()">＋ 生成</button>
+  </div>
+  <button class="btn-random" id="randomBtn" onclick="randomScene()">🎲 随机对话</button>
+</div>
+
+<!-- ── CATEGORY + SCENES (collapsible) ── -->
+<div class="scene-section">
+  <div class="scene-section-head">
+    <div class="cat-tabs" id="catTabs" style="margin-bottom:0;flex:1"></div>
+    <button class="scene-toggle" id="sceneToggleBtn" onclick="toggleSceneGrid()">收起 ▲</button>
+  </div>
+  <div class="scene-grid" id="sceneGrid"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     IMMERSIVE LAYOUT
+══════════════════════════════════════════ -->
+<div class="immersive">
+
+  <!-- LEFT COLUMN -->
+  <div class="left-col">
+
+    <!-- 场景摘要 -->
+    <div class="scene-summary" id="sceneSummary">
+      <div class="ss-header">
+        <div class="ss-av" id="ssAv">?</div>
+        <div class="ss-meta">
+          <div class="ss-title" id="ssTitle">—</div>
+          <div class="ss-role" id="ssRole">—</div>
+        </div>
+        <div class="ss-actions">
+          <button class="ss-btn" onclick="resetChat()">↺ 重置</button>
+          <button class="ss-btn danger" onclick="clearScene()">✕ 退出</button>
+        </div>
+      </div>
+      <div class="ss-ctx" id="ssCtx">—</div>
+      <div class="ss-tags" id="ssTags"></div>
+    </div>
+
+    <!-- 对话区 -->
+    <div class="chat-box">
+      <div class="chat-head">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div class="ch-av" id="chAv">?</div>
+          <div>
+            <div class="ch-title" id="chTitle">请选择场景开始练习</div>
+            <div class="ch-sub" id="chSub">从上方选择场景或点击随机对话</div>
+          </div>
+        </div>
+        <button class="reset-btn" onclick="resetChat()" title="重置对话">↺</button>
+      </div>
+      <div class="msgs" id="msgs">
+        <div class="empty">
+          <div class="em">会</div>
+          <p>选择上方场景开始练习<br>或点击「🎲 随机对话」立即开始</p>
+        </div>
+      </div>
+      <div class="input-area">
+        <textarea id="userInput" placeholder="日本語・中文・英語 都可以…" rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+          oninput="this.style.height='40px';this.style.height=Math.min(this.scrollHeight,110)+'px'"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()">↑</button>
+      </div>
+    </div>
+
+    <!-- 底部：词汇 + 设置 -->
+    <div class="bottom-row">
+
+      <!-- 重点词汇 -->
+      <div class="vocab-panel" id="vocabPanel">
+        <div class="vocab-head">
+          <span class="vocab-head-lbl">📖 重点词汇</span>
+          <span class="vocab-count-badge" id="vocabCount">0 語</span>
+        </div>
+        <div class="vocab-list" id="vocabList"></div>
+      </div>
+
+      <!-- 会话控制 -->
+      <div class="settings-panel">
+        <div class="settings-head">⚙️ 会话控制</div>
+        <div class="provider-status" id="providerStatus" style="display:none"></div>
+        <div class="lvl-row">
+          <span>对话难度</span>
+          <select class="lvl-sel" id="lvlSel" onchange="showToast('级别已更改','下次 AI 回复将调整难度！','info')">
+            <option value="N5">N5 初级入门</option>
+            <option value="N4" selected>N4 简单会话</option>
+            <option value="N3">N3 基础进阶</option>
+            <option value="N2">N2 职场交流</option>
+            <option value="N1">N1 高级口译</option>
+          </select>
+        </div>
+        <div class="settings-grid">
+          <div class="toggle on" id="togRomaji" onclick="tog('romaji',this)"><span class="dot"></span>罗马音</div>
+          <div class="toggle on" id="togZh" onclick="tog('zh',this)"><span class="dot"></span>中文</div>
+          <div class="toggle on" id="togTts" onclick="tog('tts',this)"><span class="dot"></span>自动发音</div>
+          <div class="toggle on" id="togVocab" onclick="tog('vocab',this)"><span class="dot"></span>单词解析</div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /left-col -->
+
+  <!-- RIGHT COLUMN (助教) -->
+  <div class="right-col">
+
+    <!-- ① 你可以这样回答 -->
+    <div class="coach-box">
+      <div class="coach-title"><span class="panel-icon">✍️</span>你可以这样回答</div>
+      <div class="coach-inner" id="qrArea"><div class="qr-placeholder">对话开始后，将出现 3 条回答建议<br>含罗马音 · 中文 · 发音</div></div>
+    </div>
+
+    <!-- ② AI 可能会说 -->
+    <div class="coach-box" id="nextHintBox">
+      <div class="coach-title"><span class="panel-icon">🔮</span>AI 可能会说</div>
+      <div class="coach-inner" id="nextHintPanel"><div class="qr-placeholder">对话开始后，这里会显示<br>AI 接下来可能说的句子</div></div>
+    </div>
+
+  </div><!-- /right-col -->
+
+</div><!-- /immersive -->
+</div><!-- /wrap -->
+
+<!-- ── RECORDING MODAL ── -->
+<div id="recOverlay" class="rec-overlay" style="display:none" onclick="if(event.target===this)closeRecModal()">
+  <div class="rec-modal">
+    <div class="rec-sentence">
+      <div class="rec-rm" id="recRm"></div>
+      <div class="rec-jp" id="recJp"></div>
+      <div class="rec-zh" id="recZh"></div>
+    </div>
+    <div class="rec-viz" id="recViz">
+      <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">点击录音按钮开始</span>
+    </div>
+    <div class="rec-status" id="recStatus">准备录音</div>
+    <div class="rec-controls">
+      <button class="rec-btn-sm" id="recResetBtn" onclick="resetRec()" style="display:none">🔄 重录</button>
+      <button class="rec-btn-main idle" id="recMainBtn" onclick="toggleRec()">🎙</button>
+      <button class="rec-btn-sm" id="recPlayBtn" onclick="playRec()" style="display:none">▶ 试听</button>
+    </div>
+    <div class="rec-actions">
+      <button class="rec-btn-cancel" onclick="closeRecModal()">取消</button>
+      <button class="rec-btn-send" id="recSendBtn" disabled onclick="sendRec()">✓ 使用此录音发送</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── VOICE EXPORT BAR ── -->
+<div style="max-width:1180px;margin:0 auto;padding:0 18px 20px">
+  <div class="voice-export-bar" id="voiceExportBar">
+    <span style="font-size:16px">🎙</span>
+    <span class="ve-label">对话录音已就绪，可播放完整语音对话</span>
+    <button class="ve-btn" onclick="previewVoiceDialog()">▶ 播放对话</button>
+    <button class="ve-btn primary" onclick="exportVoiceDialog()">⬇ 保存音频</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════
+function showToast(title,desc,type='info'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');t.className=`toast ${type}`;
+  const icons={success:'✅',error:'❌',info:'ℹ️'};
+  t.innerHTML=`<div class="toast-icon">${icons[type]}</div><div class="toast-content"><div class="toast-title">${title}</div><div class="toast-desc">${desc}</div></div>`;
+  c.appendChild(t);setTimeout(()=>t.classList.add('show'),50);
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},4200);
+}
+
+// ══════════════════════════════════════════
+//  API KEY
+// ══════════════════════════════════════════
+let PROVIDER=localStorage.getItem('provider')||'gemini';
+let GK_GEMINI=localStorage.getItem('gk_gemini')||'';
+let GK_GROQ=localStorage.getItem('gk_groq')||'';
+
+// ── LANG MODE (中日 / 英日) ──
+let LANG_MODE=localStorage.getItem('lang_mode')||'zh';
+function setLangMode(mode){
+  LANG_MODE=mode;localStorage.setItem('lang_mode',mode);
+  document.getElementById('langZh').classList.toggle('active',mode==='zh');
+  document.getElementById('langEn').classList.toggle('active',mode==='en');
+  // 切换时重置面板占位文字
+  const isEn=mode==='en';
+  document.getElementById('qrArea').innerHTML=`<div class="qr-placeholder">${isEn?'After chat starts, 3 reply suggestions will appear<br>with romaji · English · audio':'对话开始后，将出现 3 条回答建议<br>含罗马音 · 中文 · 发音'}</div>`;
+  document.getElementById('nextHintPanel').innerHTML=`<div class="qr-placeholder">${isEn?'After chat starts, typical AI follow-up sentences<br>will appear here':'对话开始后，这里会显示<br>AI 接下来可能说的句子'}</div>`;
+  showToast(isEn?'English Mode':'中文模式',isEn?'Switched to Chinese→English assistance':'已切换到中文辅助模式','info');
+}
+// 初始化 lang toggle 状态
+function initLangToggle(){
+  document.getElementById('langZh').classList.toggle('active',LANG_MODE==='zh');
+  document.getElementById('langEn').classList.toggle('active',LANG_MODE==='en');
+}
+const GEMINI_MODELS=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
+const GROQ_MODELS=['llama-3.3-70b-versatile','llama3-70b-8192','llama3-8b-8192','mixtral-8x7b-32768'];
+function activeKey(){return PROVIDER==='gemini'?GK_GEMINI:GK_GROQ;}
+
+function switchProvider(p){
+  PROVIDER=p;localStorage.setItem('provider',p);
+  document.getElementById('tabGemini').className='kp-tab'+(p==='gemini'?' active-gemini':'');
+  document.getElementById('tabGroq').className='kp-tab'+(p==='groq'?' active-groq':'');
+  initKeyUI();
+}
+function initKeyUI(){
+  const s=document.getElementById('kStatus'),inp=document.getElementById('kInput');
+  const k=activeKey();
+  if(k){s.innerHTML=`✅ ${PROVIDER==='gemini'?'Gemini':'Groq'} 已连接`;s.style.color='var(--accent)';inp.value=k.slice(0,8)+'••••••••••••••••••••••••';}
+  else{s.textContent='⚠️ 未设置';s.style.color='var(--red)';inp.value='';}
+  updateProviderStatus();
+}
+function saveKey(){
+  const v=document.getElementById('kInput').value.trim();
+  if(v.includes('•')){showToast('提示','已保存，无需重复输入','info');return;}
+  if(PROVIDER==='gemini'){
+    if(v.startsWith('AIza')&&v.length>30){GK_GEMINI=v;localStorage.setItem('gk_gemini',v);initKeyUI();showToast('Gemini Key 已保存','准备开始练习！','success');}
+    else showToast('格式错误','Gemini Key 以 AIzaSy 开头，长于30位','error');
+  }else{
+    if(v.length>20){GK_GROQ=v;localStorage.setItem('gk_groq',v);initKeyUI();showToast('Groq Key 已保存','完全免费，速度极快！','success');}
+    else showToast('格式错误','Groq Key 通常以 gsk_ 开头','error');
+  }
+}
+function updateProviderStatus(){
+  const ps=document.getElementById('providerStatus');const k=activeKey();
+  if(!k){ps.style.display='none';return;}
+  ps.style.display='flex';
+  if(PROVIDER==='gemini'){ps.className='provider-status gemini-mode';ps.innerHTML='<span class="provider-dot"></span>Gemini API · 免费版每分钟15次';}
+  else{ps.className='provider-status groq-mode';ps.innerHTML='<span class="provider-dot"></span>Groq API · 完全免费 · 推理极速';}
+}
+
+// ══════════════════════════════════════════
+//  SCENE DATA
+// ══════════════════════════════════════════
+const CATS=[
+  {id:'daily',label:'日常生活',icon:'🏡',scenes:[
+    {id:'conbini',icon:'🏪',name:'コンビニ',sub:'レジ・温め・ATM',av:'CVS',role:'コンビニ店員',ctx:'レジでの会計、商品の温め依頼、宅配便受取・発送、ATM・マルチコピー機案内、公共料金支払い'},
+    {id:'supermart',icon:'🛒',name:'スーパー',sub:'買物・値段・特売',av:'店',role:'スーパーの店員',ctx:'商品の場所案内、値段・賞味期限確認、特売品説明、袋の有無、ポイントカード、セルフレジ'},
+    {id:'restaurant',icon:'🍜',name:'レストラン',sub:'席・注文・アレルギー',av:'飯',role:'レストランの店員',ctx:'席案内・禁煙席確認、注文受付、アレルギー確認、おすすめ料理、追加注文、お会計'},
+    {id:'izakaya',icon:'🍶',name:'居酒屋',sub:'飲み会・コース・会計',av:'酒',role:'居酒屋の店員',ctx:'飲み放題コース説明、料理の注文、締めの一品提案、幹事として注文まとめ、割り勘計算'},
+    {id:'cafe',icon:'☕',name:'カフェ',sub:'注文・カスタム・テイクアウト',av:'珈',role:'カフェの店員',ctx:'ドリンクの注文、サイズ・ミルク・砂糖のカスタマイズ、テイクアウト、Wi-Fi・電源確認'},
+    {id:'fastfood',icon:'🍔',name:'ファストフード',sub:'セット・サイズ・支払い',av:'FF',role:'ファストフード店員',ctx:'セットメニューの選択、サイズアップ、バーガーのカスタマイズ、テイクアウト・店内選択'},
+    {id:'ramen',icon:'🍥',name:'ラーメン屋',sub:'麺・スープ・トッピング',av:'麺',role:'ラーメン店員',ctx:'券売機の使い方、麺の硬さ・スープ濃度・脂量・トッピング選択、替え玉注文'},
+    {id:'sushi',icon:'🍣',name:'回転寿司',sub:'注文・おすすめ・精算',av:'寿',role:'寿司屋の店員',ctx:'お好みの寿司注文、本日のおすすめネタ、タッチパネル注文、シャリの大きさ、お会計'},
+    {id:'yakiniku',icon:'🥩',name:'焼肉屋',sub:'部位・焼き方・コース',av:'肉',role:'焼肉屋の店員',ctx:'肉の部位説明、おすすめ食べ方・焼き加減、タレ・塩の使い分け、コース選択、追加注文'},
+    {id:'pharmacy',icon:'💊',name:'薬局・ドラッグ',sub:'症状相談・薬選び',av:'薬',role:'薬剤師',ctx:'風邪・頭痛・胃痛・花粉症の症状を聞いて薬を提案、用法・用量説明、処方箋対応'},
+    {id:'beauty',icon:'✂️',name:'美容院',sub:'スタイル・カラー・相談',av:'髪',role:'美容師',ctx:'カットスタイルの希望、長さ・量・カラー・パーマの相談、仕上がりイメージ確認'},
+    {id:'laundry',icon:'👕',name:'クリーニング',sub:'預け・染み・受取',av:'洗',role:'クリーニング店員',ctx:'衣類の素材・汚れ確認、日数・料金説明、染み抜き相談、仕上がり確認、受取'},
+    {id:'bookstore',icon:'📚',name:'本屋',sub:'本探し・取り寄せ',av:'本',role:'書店員',ctx:'本のタイトル・著者・ジャンルで検索、在庫確認、取り寄せ注文、雑誌コーナー案内'},
+    {id:'florist',icon:'🌸',name:'花屋',sub:'花束・ギフト・包装',av:'花',role:'花屋の店員',ctx:'花束の目的・予算・好みの花を聞く、季節の花の説明、ギフト包装、メッセージカード'},
+    {id:'shoes',icon:'👟',name:'靴屋',sub:'サイズ・試し履き・在庫',av:'靴',role:'靴屋の店員',ctx:'サイズの確認、試し履きの依頼、在庫確認、デザイン・色の相談、手入れ方法の説明'},
+  ]},
+  {id:'food',label:'グルメ',icon:'🍱',scenes:[
+    {id:'cafe_chat',icon:'☕',name:'カフェで友人と雑談',sub:'近況・趣味・悩み',av:'友',role:'仲のいい日本人の友達',ctx:'近況報告、最近あったこと、趣味や好みの話、仕事・恋愛の悩み相談、週末の予定'},
+    {id:'lunch_office',icon:'🍱',name:'同僚とランチ',sub:'お店・仕事・雑談',av:'同',role:'同じ会社の日本人同僚',ctx:'今日どこにする、近くのおすすめの店、仕事の話・上司の話、お昼休みの過ごし方'},
+    {id:'food_talk',icon:'🍣',name:'グルメ情報交換',sub:'おすすめ店・料理・レシピ',av:'食',role:'食いしん坊な日本人知人',ctx:'好きな料理・おすすめのお店、食べてみたい料理、料理の作り方、食文化の違い'},
+    {id:'izakaya_party',icon:'🍻',name:'会社の飲み会',sub:'乾杯・注文・会話',av:'飲',role:'会社の先輩社員',ctx:'飲み会での自己紹介、乾杯の音頭、料理の注文、会社・仕事の話、先輩への質問'},
+    {id:'cooking',icon:'🥘',name:'料理・自炊の話',sub:'レシピ・食材・節約',av:'料',role:'料理好きな日本人',ctx:'最近作った料理、簡単レシピの紹介、食材の買い方・節約術、料理が苦手な悩み'},
+    {id:'teishoku',icon:'🍱',name:'定食屋',sub:'日替わり・おかず選び',av:'定',role:'定食屋のおばさん',ctx:'日替わり定食の説明、ご飯・汁物の量、追加おかずの案内、デザートの説明'},
+    {id:'convenience_eat',icon:'🥡',name:'コンビニランチ',sub:'おすすめ・温め・セット',av:'昼',role:'コンビニ店員',ctx:'今日のおすすめ弁当・惣菜、温め時間、ドリンクとのセット割引、デザート紹介'},
+    {id:'tea_ceremony',icon:'🍵',name:'お茶・抹茶体験',sub:'作法・道具・文化',av:'茶',role:'茶道の先生',ctx:'お茶の点て方・飲み方の作法、茶道具の説明、和菓子との組み合わせ、文化的背景'},
+  ]},
+  {id:'transport',label:'交通・移動',icon:'🚃',scenes:[
+    {id:'station',icon:'🚉',name:'駅・乗換え',sub:'路線・IC・忘れ物',av:'駅',role:'駅員',ctx:'乗り換え案内、切符購入、ICカードチャージ、忘れ物窓口、定期券購入・更新'},
+    {id:'taxi',icon:'🚕',name:'タクシー',sub:'行先・ルート・領収書',av:'車',role:'タクシー運転手',ctx:'行き先を告げる、道の選択（高速・一般道）、料金の目安、領収書の依頼、おつり'},
+    {id:'bus',icon:'🚌',name:'路線バス',sub:'停留所・料金・乗換',av:'BUS',role:'バス運転手',ctx:'目的の停留所確認、料金・交通系IC対応、乗り継ぎ方法、終バス時刻の確認'},
+    {id:'airport',icon:'✈️',name:'空港',sub:'チェックイン・手荷物',av:'空',role:'空港スタッフ',ctx:'チェックイン手続き、手荷物預け・機内持込制限、搭乗口案内、免税店の場所'},
+    {id:'shinkansen',icon:'🚄',name:'新幹線',sub:'指定席・変更・グリーン',av:'新',role:'新幹線の駅員',ctx:'座席指定・変更、グリーン車の案内、自由席の混雑状況、乗り継ぎ新幹線の確認'},
+    {id:'rental',icon:'🚗',name:'レンタカー',sub:'貸出・保険・返却',av:'RC',role:'レンタカー店員',ctx:'車種・排気量の説明、保険オプション確認、ETC・ナビ操作、燃料満タン返却'},
+    {id:'subway',icon:'🚇',name:'地下鉄',sub:'路線図・乗換・一日券',av:'地',role:'地下鉄駅員',ctx:'地下鉄路線の説明、乗り換え駅・方法、ICカードのチャージ、一日乗車券の案内'},
+    {id:'share_bike',icon:'🚲',name:'シェアサイクル',sub:'アプリ・ポート・返却',av:'自',role:'シェアサイクルスタッフ',ctx:'アプリの登録と使い方、近くのポートの探し方、返却ルール・延長料金の説明'},
+    {id:'highway_bus',icon:'🛣️',name:'高速・夜行バス',sub:'座席・休憩・荷物',av:'高',role:'高速バスの乗務員',ctx:'乗車時間・座席の確認、途中休憩の案内、荷物の収納場所、毛布・枕の使い方'},
+    {id:'lost_item',icon:'🔎',name:'落し物・遺失物',sub:'届出・特徴説明',av:'遺',role:'遺失物センター担当',ctx:'落し物の特徴・失くした場所・日時の説明、届出書類の記入方法、受け取り手続き'},
+  ]},
+  {id:'public',label:'行政・公共',icon:'🏛️',scenes:[
+    {id:'bank',icon:'🏦',name:'銀行窓口',sub:'口座・振込・手続き',av:'銀',role:'銀行員',ctx:'口座開設、ATMの使い方、振込手続き、通帳・カードの再発行、在留資格確認'},
+    {id:'post',icon:'📮',name:'郵便局',sub:'発送・書留・国際便',av:'郵',role:'郵便局員',ctx:'荷物の発送・サイズ・重量確認、書留・速達、国際郵便・EMS、転送届、ゆうちょ貯金'},
+    {id:'hospital_reg',icon:'🏥',name:'病院受付',sub:'初診・保険証・順番',av:'受',role:'病院の受付スタッフ',ctx:'初診・再診受付、保険証確認、問診票記入、症状説明、診察順番・待ち時間案内'},
+    {id:'cityhall',icon:'🏢',name:'市区役所',sub:'住民票・届出・申請',av:'役',role:'市役所の窓口担当',ctx:'住民票・戸籍謄本の申請、在留カード更新、マイナンバーカード申請、引越し届出'},
+    {id:'police',icon:'🚔',name:'警察・交番',sub:'届出・相談・道案内',av:'警',role:'警察官',ctx:'落とし物・盗難の届出、道の案内、トラブルの相談、迷子や事故の対応'},
+    {id:'immigration',icon:'🛂',name:'入管・ビザ',sub:'在留資格・更新・変更',av:'入',role:'入国管理局の職員',ctx:'在留資格の更新申請、必要書類の確認、ビザ種類変更の相談、在留期間の確認'},
+    {id:'tax_office',icon:'🧾',name:'確定申告',sub:'申告書・控除・還付',av:'税',role:'税務署の担当官',ctx:'確定申告の手続き説明、必要書類、医療費控除・ふるさと納税、副業の申告、還付金'},
+    {id:'health_ins',icon:'🏡',name:'社会保険・年金',sub:'加入・変更・給付',av:'福',role:'社会保険事務所担当',ctx:'国民健康保険の加入・変更手続き、年金手帳、失業給付・育児休業給付の申請'},
+  ]},
+  {id:'housing',label:'居住生活',icon:'🏠',scenes:[
+    {id:'realestate',icon:'🏠',name:'不動産・物件',sub:'条件・内見・交渉',av:'不',role:'不動産会社の担当',ctx:'希望条件の相談（家賃・間取り・駅距離）、内見申込、敷金礼金・管理費説明、契約書'},
+    {id:'neighbor',icon:'👋',name:'隣人への挨拶',sub:'引越し・ゴミ・ルール',av:'隣',role:'隣に住む日本人',ctx:'引越し挨拶、自己紹介と手土産の渡し方、ゴミ出しルール、共有スペースの使い方'},
+    {id:'repair',icon:'🔧',name:'修理・設備トラブル',sub:'故障・見積・業者',av:'修',role:'修理業者',ctx:'エアコン・水道・電気・鍵の故障対応、症状の説明、修理費用の見積もり、作業日程調整'},
+    {id:'delivery_receive',icon:'📦',name:'宅配便受取',sub:'不在票・再配達・置き配',av:'宅',role:'配達員',ctx:'荷物の受け取りサイン、不在票の確認、再配達の依頼方法、置き配・コンビニ受け取り'},
+    {id:'utilities',icon:'🔌',name:'電気・ガス・水道',sub:'開栓・料金・変更',av:'GS',role:'電力・ガス会社担当',ctx:'引越し時の開栓工事の流れ、料金プランの比較、節電・節ガス相談、支払い方法変更'},
+    {id:'internet',icon:'📶',name:'ネット・Wi-Fi',sub:'申込・工事・トラブル',av:'NET',role:'インターネット会社サポート',ctx:'回線の申し込み・工事日程調整、Wi-Fiが繋がらないトラブル対応、速度・料金プラン変更'},
+    {id:'mansion',icon:'🏗️',name:'マンション管理',sub:'設備・騒音・申請',av:'管',role:'マンション管理員',ctx:'共有設備（駐車場・ゴミ置き場）の使い方、騒音トラブルの相談、管理費・修繕積立金'},
+    {id:'moving',icon:'🚛',name:'引越し業者',sub:'見積・梱包・当日',av:'引',role:'引越し業者の担当',ctx:'荷物の量・距離の確認、見積もりの説明、梱包資材の渡し方、作業当日のスケジュール'},
+    {id:'renovation',icon:'🪚',name:'リフォーム相談',sub:'内装・設備・予算',av:'改',role:'リフォーム会社の担当',ctx:'リフォームの希望箇所・予算の相談、見積もりと工期説明、素材・デザイン選択の提案'},
+    {id:'conbini_svc',icon:'🖨️',name:'コンビニサービス',sub:'印刷・振込・宅配',av:'便',role:'コンビニ店員',ctx:'マルチコピー機での印刷・スキャン・証明写真、公共料金支払い、宅配便の発送手続き'},
+  ]},
+  {id:'work',label:'職場・就活',icon:'💼',scenes:[
+    {id:'interview_part',icon:'🤝',name:'アルバイト面接',sub:'志望動機・シフト',av:'面',role:'アルバイト先の店長',ctx:'自己紹介、志望動機、シフト希望と柔軟性、得意なこと・苦手なこと、逆質問'},
+    {id:'interview_full',icon:'👔',name:'正社員・転職面接',sub:'自己PR・キャリア',av:'就',role:'人事担当者',ctx:'自己PR、志望動機、前職の経験、長所短所、転職理由、5年後のビジョン、逆質問'},
+    {id:'office_daily',icon:'💬',name:'職場の日常会話',sub:'挨拶・相談・雑談',av:'社',role:'親切な日本人同僚',ctx:'朝の挨拶・帰りの挨拶、業務の質問、ランチの誘い、困ったことの相談、仕事の雑談'},
+    {id:'boss_report',icon:'🗣️',name:'上司への報告・相談',sub:'報連相・申請・敬語',av:'上',role:'直属の上司',ctx:'業務の進捗報告（ほうれんそう）、問題発生時の相談、指示の確認、有休・残業の申請'},
+    {id:'meeting',icon:'📊',name:'会議・プレゼン',sub:'議事進行・発表・質疑',av:'議',role:'会議の司会者',ctx:'議題説明・進行、資料を使ったプレゼン、意見を求める、質疑応答、次回日程の調整'},
+    {id:'biz_phone',icon:'📞',name:'ビジネス電話',sub:'取次・伝言・折り返し',av:'電',role:'会社の受付担当',ctx:'電話の受け方、担当者への取り次ぎ、不在時の伝言メモ、折り返しの依頼、クレーム対応'},
+    {id:'email_doc',icon:'📧',name:'ビジネスメール',sub:'依頼・お礼・報告',av:'文',role:'日本語ビジネス文書の先生',ctx:'件名・書き出し・結びの言葉、依頼・お礼・謝罪メールの書き方、敬語の使い分け'},
+    {id:'client_meeting',icon:'🤵',name:'取引先・商談',sub:'名刺・提案・交渉',av:'客',role:'取引先の担当者',ctx:'初対面の挨拶と名刺交換のマナー、製品・サービスの提案、価格交渉、接待でのマナー'},
+    {id:'salary_nego',icon:'💴',name:'給与・昇給交渉',sub:'待遇・ボーナス・改善',av:'給',role:'人事部長',ctx:'昇給・給与改定の依頼、ボーナスの確認、福利厚生の質問、勤務条件の改善相談'},
+    {id:'quit_job',icon:'🚪',name:'退職の相談・手続き',sub:'退職届・引継・有休',av:'退',role:'直属の上司',ctx:'退職の意思表示と退職日の調整、引継ぎスケジュール作成、有休消化の申請と相談'},
+    {id:'newcomer',icon:'🌱',name:'新入社員の悩み',sub:'職場・敬語・人間関係',av:'新',role:'面倒見のいい先輩社員',ctx:'職場のルール・慣習の確認、仕事の覚え方の相談、敬語の使い方、歓迎会での挨拶'},
+    {id:'remote_work',icon:'🖥️',name:'テレワーク・リモート',sub:'Zoom・タスク・連絡',av:'テレ',role:'リモートチームのメンバー',ctx:'オンライン会議の入室・操作、画面共有・マイクトラブル対応、チャットでの業務連絡'},
+  ]},
+  {id:'school',label:'学校・学習',icon:'🎓',scenes:[
+    {id:'class_q',icon:'📚',name:'授業・先生への質問',sub:'内容・課題・試験',av:'学',role:'大学・専門学校の先生',ctx:'授業内容の質問、レポートの書き方・注意点、試験範囲の確認、参考文献の調べ方'},
+    {id:'admission',icon:'🎓',name:'入学手続き',sub:'書類・学費・奨学金',av:'事',role:'学校の事務員',ctx:'入学に必要な書類の説明、学費・授業料の支払い方法、奨学金申請の手続き、学生証の発行'},
+    {id:'canteen',icon:'🍱',name:'学食・購買',sub:'メニュー・食券・返却',av:'食',role:'学食スタッフ',ctx:'日替わり定食・メニューの説明、食券機の使い方、トレーの返却場所、購買でのパン・飲み物'},
+    {id:'club',icon:'⚽',name:'部活・サークル',sub:'勧誘・入部・練習',av:'部',role:'サークルの先輩',ctx:'活動内容・費用・頻度の説明、入部の申し込み方法、練習スケジュール・合宿の案内'},
+    {id:'research',icon:'🔬',name:'研究室・ゼミ',sub:'論文・発表・進捗',av:'研',role:'指導教員（教授）',ctx:'卒業論文・修士論文の進捗報告、実験データの解釈、発表練習へのフィードバック'},
+    {id:'jlpt',icon:'🗾',name:'日本語検定・JLPT',sub:'文法・語彙・読解',av:'試',role:'日本語の先生',ctx:'JLPT N5〜N1の文法・語彙・読解の質問、よくある間違いの指摘、模擬試験問題の解説'},
+    {id:'lang_exchange',icon:'🌐',name:'言語交換',sub:'自由会話・文化交流',av:'交',role:'日本人の言語交換パートナー',ctx:'お互いの文化・習慣の紹介、間違った日本語の優しい訂正、日常的な話題での自由会話練習'},
+    {id:'study_group',icon:'📖',name:'グループ勉強',sub:'問題・確認・スケジュール',av:'班',role:'同じ授業を受けている日本人',ctx:'授業の内容確認、試験対策・問題の相談、わからない部分の教え合い、勉強場所・時間調整'},
+  ]},
+  {id:'life_chat',label:'日常会話',icon:'💬',scenes:[
+    {id:'self_intro',icon:'🙋',name:'自己紹介',sub:'名前・出身・趣味・仕事',av:'己',role:'初めて会った日本人',ctx:'名前・出身地・仕事・趣味の紹介、日本語を勉強したきっかけ、好きな日本食・観光地の話'},
+    {id:'weather',icon:'🌤️',name:'天気・季節の話',sub:'今日・行事・好き',av:'雑',role:'近所に住む親しい日本人',ctx:'今日の天気・気温の話、好きな季節とその理由、花見・紅葉・雪・梅雨などの話題'},
+    {id:'hobby',icon:'🎮',name:'趣味の話',sub:'好きなこと・おすすめ',av:'趣',role:'趣味の合う日本人仲間',ctx:'ゲーム・アニメ・音楽・読書・スポーツなどの趣味、おすすめ作品・場所の紹介、一緒にやろうの誘い'},
+    {id:'travel',icon:'🗼',name:'旅行・観光の話',sub:'行った場所・計画',av:'旅',role:'旅行好きな日本人',ctx:'行きたい・行った場所の話、おすすめ観光スポット、旅行の計画、交通手段・お土産の話'},
+    {id:'health_life',icon:'💪',name:'健康・運動の話',sub:'スポーツ・ダイエット',av:'健',role:'健康意識の高い日本人',ctx:'最近始めたスポーツ・運動習慣、ダイエットの方法、睡眠の悩み、健康的な食生活の話'},
+    {id:'love',icon:'💕',name:'恋愛・人間関係',sub:'相談・アドバイス',av:'恋',role:'仲のいい日本人の友人',ctx:'恋愛の悩み・告白・失恋の話、友人関係のトラブル、家族との関係、アドバイスの求め方'},
+    {id:'money_life',icon:'💰',name:'お金・節約の話',sub:'節約・ポイント・投資',av:'金',role:'お金の管理が上手な日本人',ctx:'節約の方法、スーパーの特売・ポイ活・キャッシュレス活用、投資の基礎知識、家計管理'},
+    {id:'news',icon:'📰',name:'ニュース・時事',sub:'社会・環境・技術',av:'時',role:'社会に詳しい日本人知人',ctx:'最近のニュース、社会問題への意見、環境問題・AI・技術の進歩、日本と他国の比較'},
+    {id:'sns_life',icon:'📱',name:'SNS・スマホの話',sub:'アプリ・バズ・流行',av:'SNS',role:'SNSが大好きな日本人',ctx:'インスタ・TikTok・YouTubeの話、フォロー・いいね文化、バズった動画、おすすめアプリ'},
+    {id:'pet',icon:'🐱',name:'ペット・動物の話',sub:'飼い方・エピソード',av:'ペ',role:'大のペット好きな日本人',ctx:'猫・犬などのペットの話、飼育の苦労・喜び、かわいいエピソード、動物園・水族館の話'},
+    {id:'future',icon:'🌙',name:'将来の夢・目標',sub:'キャリア・ビジョン',av:'夢',role:'将来について話したい日本人',ctx:'将来やりたいこと、仕事の目標、住みたい場所、5年後・10年後の生活イメージ'},
+    {id:'seasons',icon:'🌸',name:'季節の行事・文化',sub:'祭り・年中行事・風習',av:'季',role:'日本文化に詳しい日本人',ctx:'お正月・ひな祭り・お盆などの行事の説明、地域の祭り、季節の食べ物の話'},
+  ]},
+  {id:'leisure',label:'娯楽・休暇',icon:'🎉',scenes:[
+    {id:'hotel',icon:'🏨',name:'ホテル',sub:'チェックイン・設備・観光',av:'HT',role:'ホテルのフロント',ctx:'チェックイン手続き、部屋タイプ確認、アメニティ・設備説明、観光スポット案内、チェックアウト'},
+    {id:'ryokan',icon:'🏯',name:'旅館・温泉宿',sub:'仲居・浴衣・食事',av:'旅',role:'旅館の仲居さん',ctx:'お部屋への案内、浴衣の着方、温泉の使い方・マナー、夕食・朝食の時間確認、貸切風呂'},
+    {id:'karaoke',icon:'🎤',name:'カラオケ',sub:'部屋・延長・フード',av:'KR',role:'カラオケ店員',ctx:'部屋のサイズ・時間の選択、延長手続き、フード・ドリンクの注文、機器の使い方・採点'},
+    {id:'gym',icon:'💪',name:'ジム・スポーツクラブ',sub:'入会・体験・マシン',av:'GY',role:'ジムのスタッフ',ctx:'体験入会の流れ、施設・マシンの説明・使い方、パーソナルトレーニング、月会費・退会'},
+    {id:'cinema',icon:'🎬',name:'映画館',sub:'チケット・座席・売店',av:'映',role:'映画館スタッフ',ctx:'上映時間・座席の選択、チケット購入、字幕・吹き替えの違い、ポップコーン・ドリンク注文'},
+    {id:'theme_park',icon:'🎡',name:'テーマパーク',sub:'アトラクション・待ち時間',av:'遊',role:'テーマパークのスタッフ',ctx:'入場券の購入、アトラクションの待ち時間確認、ファストパス・優先券、レストランの予約'},
+    {id:'museum',icon:'🏛️',name:'美術館・博物館',sub:'観覧・ガイド・撮影',av:'美',role:'美術館のスタッフ',ctx:'入場料・チケット購入、音声ガイドの借り方・使い方、展示の説明、写真撮影ルールの確認'},
+    {id:'shopping',icon:'👗',name:'ショッピング',sub:'試着・サイズ・セール',av:'SP',role:'アパレルショップの店員',ctx:'サイズ・デザインの相談、試着室の案内、在庫確認、セール内容の説明、会員カード・ポイント'},
+    {id:'outdoor',icon:'⛺',name:'キャンプ・アウトドア',sub:'用品選び・初心者',av:'⛺',role:'アウトドアショップの店員',ctx:'テント・バーベキュー道具の選び方、キャンプ場の予約方法、初心者向け必需品のアドバイス'},
+    {id:'onsen',icon:'♨️',name:'温泉・銭湯',sub:'入浴・マナー・食堂',av:'湯',role:'温泉施設のスタッフ',ctx:'入浴料・コース選択、タオル・アメニティの確認、温泉マナー（タトゥー・長髪）、食堂メニュー'},
+    {id:'live',icon:'🎵',name:'コンサート・ライブ',sub:'チケット・グッズ・マナー',av:'ライブ',role:'ライブ会場のスタッフ',ctx:'チケット確認・座席案内、グッズ販売・購入方法、開演時間・終演後の案内、撮影禁止ルール'},
+    {id:'sports',icon:'⚾',name:'スポーツ観戦',sub:'応援・ルール・グッズ',av:'観',role:'隣の席の熱心なサポーター',ctx:'チームの応援の仕方・掛け声、ルールの説明、一緒に応援しながらの会話、試合後の感想'},
+  ]},
+  {id:'health',label:'医療・健康',icon:'🏥',scenes:[
+    {id:'naika',icon:'🩺',name:'内科・クリニック',sub:'初診・症状・診断',av:'医',role:'内科の担当医師',ctx:'初診での症状説明（発熱・咳・頭痛・倦怠感）、既往歴・アレルギー確認、診断の説明、投薬・処方'},
+    {id:'dental',icon:'🦷',name:'歯医者・歯科',sub:'虫歯・治療・クリーニング',av:'歯',role:'歯科医師',ctx:'歯の痛み・しみる症状の説明、レントゲン・治療内容の説明、治療回数・費用の確認、定期健診'},
+    {id:'eye',icon:'👁️',name:'眼科・コンタクト',sub:'視力・処方・ドライアイ',av:'眼',role:'眼科医',ctx:'視力低下の悩み相談、コンタクトレンズ・メガネの処方、目の疲れ・ドライアイ・充血の相談'},
+    {id:'emergency_room',icon:'🚑',name:'救急・急患',sub:'緊急症状・アレルギー',av:'救',role:'救急外来の受付',ctx:'急病・怪我での来院、症状の緊急度を説明、アレルギー・常用薬の確認、保険証がない場合の対応'},
+    {id:'mental',icon:'🧠',name:'心療内科・カウンセリング',sub:'ストレス・不眠・不安',av:'心',role:'カウンセラー・心療内科医',ctx:'ストレス・不眠・不安・パニックの症状相談、生活習慣の確認、治療方針・通院スケジュール説明'},
+    {id:'dispensary',icon:'💊',name:'調剤薬局',sub:'処方箋・副作用・服薬',av:'調',role:'調剤薬剤師',ctx:'処方箋の提出・確認、薬の効能・副作用・飲み合わせの説明、ジェネリック医薬品の提案'},
+    {id:'beauty_clinic',icon:'✨',name:'美容クリニック',sub:'脱毛・シミ・相談',av:'美',role:'美容クリニックのカウンセラー',ctx:'脱毛・シミ取り・美白・プチ整形の施術相談、料金プラン・モニター制度の説明、副作用の確認'},
+    {id:'yoga',icon:'🧘',name:'ヨガ・フィットネス',sub:'体験・効果・プログラム',av:'ヨガ',role:'ヨガ・フィットネスインストラクター',ctx:'体験レッスンの流れ、効果・難易度の説明、週のプログラム・スケジュール確認、入会手続き'},
+  ]},
+  {id:'techinterview',label:'⚡ 技術面接',icon:'⚡',scenes:[
+    {id:'ti_general',icon:'🤝',name:'面接・基本',sub:'自己紹介・志望動機',av:'面',_g:'bg',role:'日系メーカーの人事担当者',ctx:'技術系職種の一次面接。自己紹介、技術背景、志望動機、強み弱み、キャリアビジョンを順に質問し深掘りする。'},
+    {id:'ti_tech_qa',icon:'💬',name:'技術質疑応答',sub:'プロジェクト経験深掘り',av:'技',_g:'bg',role:'技術部門のシニアエンジニア',ctx:'過去の設計・開発経験をSTARメソッドで深掘りする。'},
+    {id:'ti_salary',icon:'💴',name:'条件確認・交渉',sub:'給与・勤務条件',av:'条',_g:'bg',role:'人事担当者（条件面談）',ctx:'内定後の条件面談。給与提示、残業規定、有給、入社日調整。'},
+    {id:'ti_elec_gen',icon:'⚡',name:'電気エンジニア',sub:'回路・制御・シーケンス',av:'電',_g:'be',role:'電気設計部門のリードエンジニア',ctx:'シーケンス制御(PLC・ラダー図)、電気回路設計、制御盤設計、JIS規格、安全規格を質問する'},
+    {id:'ti_elec_hv',icon:'🔌',name:'高圧・受変電',sub:'高圧設備・変電所',av:'高',_g:'be',role:'高圧電気設備の技術部長',ctx:'高圧受電設備(キュービクル・VCB・変圧器)、保護継電器整定を確認する。'},
+    {id:'ti_elec_auto',icon:'🤖',name:'制御・自動化',sub:'PLC・FA・ロボット',av:'FA',_g:'be',role:'FAシステム部門の技術面接官',ctx:'PLC、インバータ、サーボ、産業用ロボットを質問する'},
+    {id:'ti_solar',icon:'☀️',name:'太陽光発電',sub:'PV・蓄電・系統連系',av:'PV',_g:'bn',role:'再生可能エネルギー企業の技術面接官',ctx:'PVシステム設計、系統連系規程、蓄電池を質問する'},
+    {id:'ti_battery',icon:'🔋',name:'蓄電池・EV',sub:'リチウム電池・BMS',av:'EV',_g:'bn',role:'EV・蓄電池メーカーの技術面接官',ctx:'リチウムイオン電池の原理・劣化、BMS設計、SOC/SOH推定を質問する'},
+    {id:'ti_eplan',icon:'🖥️',name:'EPLAN設計',sub:'EPLAN Electric・回路図',av:'EP',_g:'bs',role:'EPLAN認定エンジニア',ctx:'EPLAN Electric P8操作、部品マスタ、PLC設計を質問する'},
+    {id:'ti_scada',icon:'📡',name:'SCADA・HMI',sub:'監視制御・データ収集',av:'SC',_g:'bs',role:'制御システムインテグレーターの面接官',ctx:'SCADAソフト、HMI画面設計、OPC-UA・Modbus通信を質問する'},
+  ]},
+  {id:'emergency',label:'緊急・トラブル',icon:'🆘',scenes:[
+    {id:'lost',icon:'🔍',name:'道に迷った',sub:'道案内・地図・目印',av:'迷',role:'通りすがりの親切な日本人',ctx:'道に迷った時の助けを求める、地図を見ながらの説明、目印を使った案内、スマホ地図の活用'},
+    {id:'sick',icon:'🤒',name:'急病・体調不良',sub:'救急・症状・アレルギー',av:'救',role:'救急病院の受付',ctx:'急病・怪我での来院、症状の緊急説明、アレルギー・常用薬確認、保険証未持参時の対応'},
+    {id:'accident',icon:'⚠️',name:'事故・トラブル',sub:'警察・保険・謝罪',av:'事',role:'警察官・保険会社担当',ctx:'交通事故の報告、物品破損のお詫び、保険申請の流れ、目撃者への確認、示談の話し合い'},
+    {id:'stolen',icon:'🔒',name:'紛失・盗難届出',sub:'警察・遺失物・再発行',av:'届',role:'警察窓口の担当者',ctx:'パスポート・財布・スマホの紛失・盗難届出、遺失物センターへの問い合わせ、再発行手続き'},
+    {id:'disaster',icon:'🌊',name:'災害・避難',sub:'地震・台風・避難所',av:'避',role:'避難所の運営スタッフ',ctx:'地震・台風・洪水時の避難誘導、避難所での生活ルール・物資の受け取り、安否確認方法'},
+    {id:'complaint',icon:'😤',name:'クレーム・苦情',sub:'不具合・返金・解決',av:'苦',role:'店舗・サービスの責任者',ctx:'商品の不具合・サービスへの不満を丁寧に伝える、返金・交換の要求、再発防止策の確認'},
+    {id:'card_stop',icon:'💳',name:'カード紛失・停止',sub:'カード会社・再発行',av:'カ',role:'クレジットカード会社のオペレーター',ctx:'クレジットカードの紛失・盗難報告、不正使用の確認、利用停止手続き、新カードの再発行申請'},
+  ]},
+];
+const TIG=[
+  {label:'通用面试流程',cls:'bg',ids:['ti_general','ti_tech_qa','ti_salary']},
+  {label:'电气工程',cls:'be',ids:['ti_elec_gen','ti_elec_hv','ti_elec_auto']},
+  {label:'能源领域',cls:'bn',ids:['ti_solar','ti_battery']},
+  {label:'电气设计软件',cls:'bs',ids:['ti_eplan','ti_scada']},
+];
+const TIBL={bg:'通用',be:'電気',bn:'エネルギー',bs:'ソフト'};
+const ALL={};
+CATS.forEach(c=>c.scenes.forEach(s=>{ALL[s.id]=s;}));
+const S={cat:'daily',scene:null,msgs:[],loading:false,set:{romaji:true,zh:true,tts:true,vocab:true}};
+let sceneGridCollapsed=false;
+
+// ══════════════════════════════════════════
+//  SCENE UI
+// ══════════════════════════════════════════
+function renderCats(){
+  document.getElementById('catTabs').innerHTML=CATS.map(c=>
+    `<button class="cat-tab ${c.id==='techinterview'?'ti-tab':''} ${S.cat===c.id?'active':''}" onclick="selCat('${c.id}')">${c.icon} ${c.label}</button>`
+  ).join('');
+}
+function selCat(id){
+  S.cat=id;
+  renderCats();
+  renderScenes();
+  // 切换分类时自动展开场景列表
+  if(sceneGridCollapsed){
+    sceneGridCollapsed=false;
+    document.getElementById('sceneGrid').classList.remove('collapsed');
+    document.getElementById('sceneToggleBtn').textContent='收起 ▲';
+  }
+}
+function renderScenes(){
+  const g=document.getElementById('sceneGrid');
+  // 随机按钮行（始终在网格前显示）
+  const randRow=`<div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:2px">
+    <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:.08em;flex:1">本分类场景</span>
+    <button onclick="randomCatScene()" style="font-size:11px;padding:3px 12px;border-radius:20px;border:1.5px solid rgba(109,40,217,.2);background:#f5f3ff;color:#7c3aed;cursor:pointer;font-family:inherit;font-weight:600;transition:all .2s" onmouseover="this.style.background='#ede9fe'" onmouseout="this.style.background='#f5f3ff'">🎲 本类随机</button>
+  </div>`;
+  if(S.cat==='techinterview'){
+    let h=randRow;
+    TIG.forEach(gr=>{
+      h+=`<div class="ti-sec">${gr.label}</div>`;
+      gr.ids.forEach(id=>{
+        const sc=ALL[id];if(!sc)return;
+        h+=`<div class="scene-card ${gr.cls} ${S.scene?.id===id?'active':''}" onclick="selScene('${id}')" style="flex-direction:row;align-items:center;gap:8px;padding:8px 11px">
+          <span style="font-size:15px;flex-shrink:0">${sc.icon}</span>
+          <div style="min-width:0;flex:1"><div class="sc-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sc.name}</div><div class="sc-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sc.sub}</div></div>
+        </div>`;
+      });
+    });
+    g.innerHTML=h;
+  }else{
+    const cat=CATS.find(c=>c.id===S.cat);
+    if(!cat)return;
+    g.innerHTML=randRow+cat.scenes.map(sc=>`
+      <div class="scene-card ${S.scene?.id===sc.id?'active':''}" onclick="selScene('${sc.id}')" style="flex-direction:row;align-items:center;gap:8px;padding:8px 11px">
+        <span style="font-size:15px;flex-shrink:0">${sc.icon}</span>
+        <div style="min-width:0;flex:1"><div class="sc-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sc.name}</div><div class="sc-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sc.sub}</div></div>
+      </div>`).join('');
+  }
+}
+function randomCatScene(){
+  if(S.loading)return;
+  const cat=CATS.find(c=>c.id===S.cat);
+  if(!cat||!cat.scenes.length)return;
+  const sc=cat.scenes[Math.floor(Math.random()*cat.scenes.length)];
+  selScene(sc.id);
+  showToast('本类随机',`🎲「${cat.label}」→「${sc.name}」，开始！`,'success');
+}
+function toggleSceneGrid(){
+  sceneGridCollapsed=!sceneGridCollapsed;
+  document.getElementById('sceneGrid').classList.toggle('collapsed',sceneGridCollapsed);
+  document.getElementById('sceneToggleBtn').textContent=sceneGridCollapsed?'展开 ▼':'收起 ▲';
+}
+function selScene(id){
+  if(S.loading)return;
+  const sc=ALL[id];if(!sc)return;
+  S.scene=sc;S.msgs=[];
+  renderScenes();
+  // 更新对话头
+  document.getElementById('chAv').textContent=sc.av;
+  document.getElementById('chTitle').textContent=sc.name+' — '+sc.sub;
+  document.getElementById('chSub').textContent=sc.role+'があなたと会話します';
+  // 更新场景摘要
+  updateSummary(sc);
+  clearChat();
+  // 自动收起场景列表，沉浸入对话
+  if(!sceneGridCollapsed)toggleSceneGrid();
+  setTimeout(()=>{startConv();document.getElementById('userInput').focus();},250);
+}
+function updateSummary(sc){
+  document.getElementById('ssAv').textContent=sc.av;
+  document.getElementById('ssTitle').textContent=sc.icon+' '+sc.name+' — '+sc.sub;
+  document.getElementById('ssRole').textContent=sc.role;
+  document.getElementById('ssCtx').textContent=sc.ctx;
+  // 难度标签
+  const lv=document.getElementById('lvlSel').value;
+  document.getElementById('ssTags').innerHTML=`<span class="ss-tag">${lv}</span><span class="ss-tag">${sc.sub}</span>`;
+  document.getElementById('sceneSummary').classList.add('show');
+}
+function clearScene(){
+  S.scene=null;S.msgs=[];
+  document.getElementById('sceneSummary').classList.remove('show');
+  document.getElementById('chAv').textContent='?';
+  document.getElementById('chTitle').textContent='请选择场景开始练习';
+  document.getElementById('chSub').textContent='从上方选择场景或点击随机对话';
+  clearChat();
+  if(sceneGridCollapsed)toggleSceneGrid();
+  renderScenes();
+}
+function clearChat(){
+  document.getElementById('msgs').innerHTML='';
+  document.getElementById('qrArea').innerHTML='<div class="qr-placeholder">对话开始后，将出现 3 条回答建议<br>含罗马音 · 中文 · 发音</div>';
+  document.getElementById('nextHintPanel').innerHTML='<div class="qr-placeholder">对话开始后，这里会显示<br>AI 接下来可能说的句子</div>';
+  document.getElementById('vocabList').innerHTML='';
+  document.getElementById('vocabCount').textContent='0 語';
+  document.getElementById('vocabPanel').classList.remove('show');
+  // 重置语音轨道
+  if(typeof VOICE_TRACK!=='undefined'){VOICE_TRACK.length=0;}
+  const bar=document.getElementById('voiceExportBar');if(bar)bar.classList.remove('show');
+  _voicePlaying=false;window.speechSynthesis&&window.speechSynthesis.cancel();
+}
+function resetChat(){if(!S.scene||S.loading)return;S.msgs=[];clearChat();setTimeout(startConv,200);}
+
+// ── 随机对话 ──
+function randomScene(){
+  if(S.loading)return;
+  const allIds=Object.keys(ALL);
+  const id=allIds[Math.floor(Math.random()*allIds.length)];
+  // 找到该 scene 所在 cat 并切换
+  CATS.forEach(c=>{if(c.scenes.find(s=>s.id===id)){S.cat=c.id;}});
+  renderCats();
+  selScene(id);
+  showToast('随机场景','✨ 已为你随机选择一个场景，开始练习！','success');
+}
+
+// ══════════════════════════════════════════
+//  SYSTEM PROMPT
+// ══════════════════════════════════════════
+function sysP(){
+  const sc=S.scene,lv=document.getElementById('lvlSel').value;
+  const isEn=LANG_MODE==='en';
+  const transLang=isEn?'英語':'中国語';
+  const transKey=isEn?'en':'zh';
+  const transDesc=isEn?'English translation':'中国語訳';
+  return `あなたは日本語会話練習AIです。
+【設定】
+- シーン：${sc.name}（${sc.sub}）
+- 役割：${sc.role}
+- 背景：${sc.ctx}
+- レベル：${lv}（このレベルに適した自然な表現を使ってください）
+
+【出力JSON形式（必須）】
+- jp: AIの日本語返答
+- zh: その${transLang}訳（${transDesc}）
+- romaji: jpのローマ字（ヘボン式）
+- words: 重要語彙（最大4つ）。各 {jp, reading（ひらがな読み）, zh（${transLang}訳）}
+- suggestions: ユーザーが次に言える自然な返答候補3つ。各 {jp（日本語）, romaji（ローマ字）, zh（${transLang}訳）}
+- next_hints: AIが次に言いそうな典型的な続きの文2つ（学習ヒント）。各 {jp, romaji, zh（${transLang}訳）}`;
+}
+
+// ══════════════════════════════════════════
+//  NETWORK
+// ══════════════════════════════════════════
+async function fetchWithRetry(url,options,retries=4,delay=1100){
+  try{const r=await fetch(url,options);if(r.ok)return r;if(retries>0&&(r.status===429||r.status>=500)){await new Promise(res=>setTimeout(res,delay));return fetchWithRetry(url,options,retries-1,delay*2);}return r;}
+  catch(e){if(retries>0){await new Promise(res=>setTimeout(res,delay));return fetchWithRetry(url,options,retries-1,delay*2);}throw e;}
+}
+function addErrorMsg(title,detail){
+  const area=document.getElementById('msgs');const d=document.createElement('div');d.className='msg-row ai';
+  d.innerHTML=`<div class="msg-av">⚠️</div><div class="msg-body" style="width:100%"><div class="bubble" style="background:var(--red-light);border:1.5px solid #fca5a5;color:#991b1b;border-radius:4px 14px 14px 14px;padding:12px 14px;width:100%"><div style="font-weight:700;margin-bottom:5px;font-size:14px">${esc(title)}</div><div style="font-size:12px;line-height:1.5;color:#7f1d1d">${esc(detail)}</div></div></div>`;
+  area.appendChild(d);area.scrollTop=area.scrollHeight;
+}
+
+// ══════════════════════════════════════════
+//  AI ENGINE — Gemini + Groq
+// ══════════════════════════════════════════
+const chatSchema={type:"object",properties:{
+  jp:{type:"string"},zh:{type:"string"},romaji:{type:"string"},
+  words:{type:"array",items:{type:"object",properties:{jp:{type:"string"},reading:{type:"string"},zh:{type:"string"}},required:["jp","reading","zh"]}},
+  suggestions:{type:"array",items:{type:"object",properties:{jp:{type:"string"},romaji:{type:"string"},zh:{type:"string"}},required:["jp","romaji","zh"]}},
+  next_hints:{type:"array",items:{type:"object",properties:{jp:{type:"string"},romaji:{type:"string"},zh:{type:"string"}},required:["jp","romaji","zh"]}}
+},required:["jp","zh","romaji","words","suggestions","next_hints"]};
+const sceneSchema={type:"object",properties:{id:{type:"string"},icon:{type:"string"},name:{type:"string"},sub:{type:"string"},av:{type:"string"},role:{type:"string"},ctx:{type:"string"}},required:["id","icon","name","sub","av","role","ctx"]};
+const locationSchema={type:"object",properties:{placeName:{type:"string"},sceneId:{type:"string"},hint:{type:"string"}},required:["placeName","sceneId","hint"]};
+
+async function callAI(msgs,mode='chat'){
+  const k=activeKey();
+  if(!k){addErrorMsg('APIキーが未設定です','页面顶部请先配置 API Key（Gemini 或 Groq）。');return null;}
+  return PROVIDER==='groq'?callGroq(msgs,mode,k):callGemini(msgs,mode,k);
+}
+async function callGemini(msgs,mode,k){
+  const sm={chat:chatSchema,scene:sceneSchema,location:locationSchema};
+  const body={contents:msgs,generationConfig:{temperature:mode==='chat'?0.85:0.65,maxOutputTokens:mode==='chat'?1024:384,responseMimeType:"application/json",responseSchema:sm[mode]||chatSchema}};
+  if(mode==='chat'){
+    const isEn=LANG_MODE==='en';
+    const langNote=isEn?'\n\n【重要】zhフィールドは必ず英語（English）で出力してください。中国語は使用しないでください。':'\n\n【重要】zhフィールドは必ず中国語（简体中文）で出力してください。';
+    body.system_instruction={role:'system',parts:[{text:sysP()+langNote}]};
+  }
+  let lastError=null;
+  for(const model of GEMINI_MODELS){
+    try{
+      const r=await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${k}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      if(r.status===404){lastError=`Model ${model} not found`;continue;}
+      if(!r.ok){const err=await r.json().catch(()=>({error:{message:r.status+''}}));const msg=err?.error?.message||r.statusText;if(msg.includes('not found')||msg.includes('Model')||(r.status===400&&msg.includes('models/'))){lastError=msg;continue;}S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;const em={400:'API Key 无效或请求格式错误',403:'权限不足，请检查 Key',429:'调用频率超限（429）— 免费版每分钟15次，建议换 Groq Key（免费）'};addErrorMsg('Gemini エラー',em[r.status]||`连接失败（${r.status}）：${msg}`);throw new Error(msg);}
+      const d=await r.json();return d.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+    }catch(e){lastError=e.message;if(e.message.includes('API')||e.message.includes('Gemini'))throw e;}
+  }
+  S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;
+  addErrorMsg('Gemini モデル不可用','所有 Gemini 模型均不可用，建议切换到 🟠 Groq（完全免费）。错误：'+lastError);
+  throw new Error('No Gemini models');
+}
+async function callGroq(msgs,mode,k){
+  const openAIMsgs=[];
+  if(mode==='chat'){
+    const isEn=LANG_MODE==='en';
+    const zhDesc=isEn?'English translation of jp':'中国語訳';
+    const jsonHint=`\n\n必ず以下の形式のJSONのみを出力してください（前置きなし、コードブロックなし）。zhフィールドは必ず${isEn?'英語（English）':'中国語'}で記入してください：\n{"jp":"...","zh":"...(${zhDesc})","romaji":"...","words":[{"jp":"...","reading":"...","zh":"...(${zhDesc})"}],"suggestions":[{"jp":"...","romaji":"...","zh":"...(${zhDesc})"}],"next_hints":[{"jp":"...","romaji":"...","zh":"...(${zhDesc})"}]}`;
+    openAIMsgs.push({role:'system',content:sysP()+jsonHint});
+  }
+  for(const m of msgs){openAIMsgs.push({role:m.role==='model'?'assistant':'user',content:m.parts?.[0]?.text||m.content||''});}
+  if(mode==='scene'){const lm=openAIMsgs[openAIMsgs.length-1];if(lm)lm.content+=' 必ずJSONのみで出力：{"id":"...","icon":"...","name":"...","sub":"...","av":"...","role":"...","ctx":"..."}';}
+  if(mode==='location'){const lm=openAIMsgs[openAIMsgs.length-1];if(lm)lm.content+=' 必ずJSONのみで出力：{"placeName":"...","sceneId":"...","hint":"..."}';}
+  let lastError=null;
+  for(const model of GROQ_MODELS){
+    try{
+      const r=await fetchWithRetry('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model,messages:openAIMsgs,temperature:mode==='chat'?0.85:0.65,max_tokens:mode==='chat'?1024:384,response_format:{type:'json_object'}})});
+      if(r.status===404){lastError=`Model ${model} not found`;continue;}
+      if(!r.ok){const err=await r.json().catch(()=>({error:{message:r.status+''}}));const msg=err?.error?.message||r.statusText;if(r.status===401){S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;addErrorMsg('Groq Key 无效','请检查你的 Groq API Key 是否正确。');throw new Error(msg);}if(r.status===429){S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;addErrorMsg('Groq レート制限','频率限制，请稍等几秒再试。');throw new Error(msg);}lastError=msg;continue;}
+      const d=await r.json();return d.choices?.[0]?.message?.content||'{}';
+    }catch(e){lastError=e.message;if(e.message.includes('Groq'))throw e;}
+  }
+  S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;
+  addErrorMsg('Groq 接続失敗','所有 Groq 模型均不可用。错误：'+lastError);throw new Error('No Groq models');
+}
+
+// ══════════════════════════════════════════
+//  CONVERSATION
+// ══════════════════════════════════════════
+async function startConv(){
+  if(!S.scene)return;S.loading=true;showTyping();
+  if(!activeKey()){removeTyping();S.loading=false;addErrorMsg('APIキーが未設定です','请先配置 Gemini 或 Groq API Key。');return;}
+  try{
+    const txt=await callAI([{role:'user',parts:[{text:'会話を始めてください。役になりきって最初の声かけをしてください。'}]}],'chat');
+    removeTyping();S.loading=false;
+    if(txt){const d=parse(txt);addAI(d);S.msgs.push({role:'model',parts:[{text:txt}]});}
+  }catch(e){removeTyping();S.loading=false;console.error(e);}
+}
+async function sendMsg(){
+  if(S.loading||!S.scene)return;
+  const ta=document.getElementById('userInput');
+  const text=ta.value.trim();if(!text)return;
+  ta.value='';ta.style.height='40px';
+  document.getElementById('qrArea').innerHTML='';
+  document.getElementById('nextHintPanel').innerHTML='';
+  addUser(text);S.msgs.push({role:'user',parts:[{text}]});
+  S.loading=true;document.getElementById('sendBtn').disabled=true;showTyping();
+  if(!activeKey()){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;addErrorMsg('APIキーが未設定です','请先配置 API Key。');return;}
+  try{
+    const hist=S.msgs.slice(-14);let start=0;while(start<hist.length&&hist[start].role!=='user')start++;
+    const txt=await callAI(hist.slice(start),'chat');
+    removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;
+    if(txt){const d=parse(txt);addAI(d);S.msgs.push({role:'model',parts:[{text:txt}]});}
+  }catch(e){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;console.error(e);}
+}
+function parse(txt){
+  try{return JSON.parse(txt.trim());}catch(e){const m=txt.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0]);}catch(e2){}console.error('parse:',txt);return{jp:txt,zh:'',romaji:'',words:[],suggestions:[],next_hints:[]};}
+}
+
+// ══════════════════════════════════════════
+//  RENDERING
+// ══════════════════════════════════════════
+function addAI(d){
+  const area=document.getElementById('msgs'),av=S.scene?.av||'AI';
+  const row=document.createElement('div');row.className='msg-row ai';
+  const rm=S.set.romaji&&d.romaji?`<div class="rm-line">${esc(d.romaji)}</div>`:'';
+  const zh=S.set.zh&&d.zh?`<div class="zh-line">${esc(d.zh)}</div>`:'';
+  const jpEsc=escA(d.jp);
+  row.innerHTML=`<div class="msg-av">${av}</div><div class="msg-body"><div class="bubble">${rm}<div class="jp-line">${esc(d.jp)}</div>${zh}</div><div class="msg-actions"><button class="tts-btn" onclick="speak('${jpEsc}',this)">▶ AI 発音</button></div></div>`;
+  area.appendChild(row);area.scrollTop=area.scrollHeight;
+  if(d.suggestions?.length)renderQR(d.suggestions);
+  if(d.next_hints?.length)renderNextHints(d.next_hints);
+  if(S.set.vocab&&d.words?.length)renderVocab(d.words);
+  // 记录 AI 语音轨道
+  VOICE_TRACK.push({type:'ai',text:d.jp,blob:null,url:null});
+  if(VOICE_TRACK.length>0)document.getElementById('voiceExportBar').classList.add('show');
+  if(S.set.tts)setTimeout(()=>speak(d.jp,null),400);
+}
+function addUser(text){
+  const area=document.getElementById('msgs'),row=document.createElement('div');row.className='msg-row user';
+  const jpEsc=escA(text);
+  row.innerHTML=`<div class="msg-av">你</div><div class="msg-body"><div class="bubble"><div class="jp-line">${esc(text)}</div></div><div class="msg-actions"><button class="tts-btn user-tts" onclick="speak('${jpEsc}',this)">▶ 発音</button></div></div>`;
+  area.appendChild(row);area.scrollTop=area.scrollHeight;
+  // 普通文字输入也记入语音轨道（用 TTS）
+  VOICE_TRACK.push({type:'user-tts',text,blob:null,url:null});
+  if(VOICE_TRACK.length>0)document.getElementById('voiceExportBar').classList.add('show');
+}
+function renderQR(suggestions){
+  const area=document.getElementById('qrArea');
+  if(!suggestions?.length){area.innerHTML='<div class="qr-placeholder">暂无建议</div>';return;}
+  area.innerHTML='<div class="sugg-list">'+suggestions.map(x=>{
+    const jp=typeof x==='string'?x:(x.jp||'');
+    const rm=typeof x==='string'?'':(x.romaji||'');
+    const zh=typeof x==='string'?'':(x.zh||'');
+    const jpEsc=escA(jp);const rmEsc=escA(rm);const zhEsc=escA(zh);
+    return `<div class="sugg-card" onclick="openRecModal('${jpEsc}','${rmEsc}','${zhEsc}')">
+      ${rm?`<div class="sugg-rm">${esc(rm)}</div>`:''}
+      <div class="sugg-jp">${esc(jp)}</div>
+      ${zh?`<div class="sugg-zh">${esc(zh)}</div>`:''}
+      <div style="position:absolute;right:9px;top:50%;transform:translateY(-50%);display:flex;gap:5px;align-items:center">
+        <button class="sugg-tts" onclick="event.stopPropagation();speak('${jpEsc}',this)" title="TTS试听">▶</button>
+        <button class="sugg-tts" style="font-size:11px" onclick="event.stopPropagation();openRecModal('${jpEsc}','${rmEsc}','${zhEsc}')" title="录音">🎙</button>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+function useQR(t){document.getElementById('userInput').value=t;sendMsg();}
+function renderNextHints(hints){
+  const panel=document.getElementById('nextHintPanel');
+  if(!hints?.length){panel.innerHTML='<div class="qr-placeholder">对话开始后，这里会显示<br>AI 接下来可能说的句子</div>';return;}
+  panel.innerHTML='<div class="hint-list">'+hints.map(h=>{
+    const jpEsc=escA(h.jp);
+    return `<div class="hint-card">
+      ${h.romaji?`<div class="hint-rm">${esc(h.romaji)}</div>`:''}
+      <div class="hint-jp">${esc(h.jp)}</div>
+      ${h.zh?`<div class="hint-zh">${esc(h.zh)}</div>`:''}
+      <button class="hint-tts" onclick="speak('${jpEsc}',this)">▶</button>
+    </div>`;
+  }).join('')+'</div>';
+}
+function renderVocab(words){
+  document.getElementById('vocabCount').textContent=words.length+' 語';
+  document.getElementById('vocabList').innerHTML=words.map(w=>`
+    <div class="vocab-item">
+      <div class="vocab-item-inner">
+        <span class="v-jp">${esc(w.jp)}</span>
+        <span class="v-rm">${esc(w.reading||'')}</span>
+        <span class="v-zh">${esc(w.zh)}</span>
+      </div>
+      <button class="v-tts" onclick="speak('${escA(w.jp)}',this)">▶</button>
+    </div>`).join('');
+  document.getElementById('vocabPanel').classList.add('show');
+}
+function showTyping(){
+  const area=document.getElementById('msgs'),d=document.createElement('div');d.className='msg-row ai';d.id='typingRow';
+  d.innerHTML=`<div class="msg-av">${S.scene?.av||'AI'}</div><div class="msg-body"><div class="bubble"><div class="typing"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></div></div></div>`;
+  area.appendChild(d);area.scrollTop=area.scrollHeight;
+}
+function removeTyping(){document.getElementById('typingRow')?.remove();}
+
+// ══════════════════════════════════════════
+//  TTS
+// ══════════════════════════════════════════
+let ttsVoices=[];
+function loadVoices(){ttsVoices=window.speechSynthesis.getVoices();}
+if('speechSynthesis'in window){loadVoices();window.speechSynthesis.onvoiceschanged=loadVoices;}
+function speak(text,btn){
+  if(!('speechSynthesis'in window))return;
+  try{
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=0.88;u.pitch=1.0;
+    const v=ttsVoices.find(x=>x.lang==='ja-JP')||ttsVoices.find(x=>x.lang==='ja')||ttsVoices.find(x=>x.lang.startsWith('ja'));
+    if(v)u.voice=v;
+    if(btn){btn.classList.add('playing');u.onend=()=>btn.classList.remove('playing');u.onerror=()=>btn.classList.remove('playing');}
+    window.speechSynthesis.speak(u);
+  }catch(e){console.warn('TTS:',e);}
+}
+
+function tog(key,el){S.set[key]=!S.set[key];el.classList.toggle('on',S.set[key]);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escA(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+// ══════════════════════════════════════════
+//  GENERATE SCENE
+// ══════════════════════════════════════════
+async function generateScene(){
+  if(S.loading)return;
+  const kw=document.getElementById('kwInput').value.trim();if(!kw)return;
+  if(!activeKey()){showToast('APIキー未設定','请先设置 Gemini 或 Groq API Key','error');return;}
+  const btn=document.getElementById('genBtn');btn.disabled=true;btn.textContent='生成中…';S.loading=true;
+  try{
+    const txt=await callAI([{role:'user',parts:[{text:`ユーザーが入力したキーワードに基づいて、日本語会話練習用のシーンを1つ作成してください。キーワード：${kw}`}]}],'scene');
+    const sc=parse(txt);sc.id='custom_'+Date.now();ALL[sc.id]=sc;
+    let cc=CATS.find(c=>c.id==='_custom');
+    if(!cc){cc={id:'_custom',label:'自定义',icon:'✨',scenes:[]};CATS.unshift(cc);}
+    cc.scenes.unshift(sc);S.cat='_custom';renderCats();renderScenes();S.loading=false;selScene(sc.id);
+    document.getElementById('kwInput').value='';
+    showToast('场景创建成功',`已规划「${sc.name}」对话场景！`,'success');
+  }catch(e){S.loading=false;showToast('场景生成失败',e.message||'请重试','error');}
+  btn.disabled=false;btn.innerHTML='＋ 生成';
+}
+
+// ══════════════════════════════════════════
+//  GEOLOCATION
+// ══════════════════════════════════════════
+function getLocation(){
+  if(!navigator.geolocation){showToast('定位失败','浏览器不支持地理位置获取','error');return;}
+  const dot=document.getElementById('gdot'),lbl=document.getElementById('geoLbl');lbl.textContent='取得中…';
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const{latitude:lat,longitude:lng}=pos.coords;dot.classList.add('on');lbl.textContent=`${lat.toFixed(3)},${lng.toFixed(3)}`;
+    if(!activeKey()){showToast('定位成功','位置已获取，但请先设置 API Key 以推荐场景！','info');return;}
+    try{
+      const txt=await callAI([{role:'user',parts:[{text:`根据GPS坐标判断用户可能在什么类型的日本场所，只输出纯JSON。坐标：纬度${lat.toFixed(4)}, 经度${lng.toFixed(4)}，日本`}]}],'location');
+      const json=parse(txt);
+      document.getElementById('locName').textContent=json.placeName;
+      document.getElementById('locHint').textContent=json.hint;
+      document.getElementById('locCard').classList.add('show');
+      document.getElementById('locUseBtn').onclick=()=>{
+        if(json.sceneId!=='other'&&ALL[json.sceneId])selScene(json.sceneId);
+        else{document.getElementById('kwInput').value=json.placeName;generateScene();}
+        document.getElementById('locCard').classList.remove('show');
+      };
+      showToast('定位成功',`推荐练习场景：${json.placeName}`,'success');
+    }catch(e){showToast('定位解析失败','无法解析位置推荐场景','error');}
+  },()=>{lbl.textContent='取得失敗';showToast('定位失败','请允许网页访问地理位置','error');});
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+//  VOICE RECORDING SYSTEM
+// ══════════════════════════════════════════
+const REC={
+  mediaRecorder:null, chunks:[], blob:null,
+  audioURL:null, audioEl:null,
+  pending:{jp:'',romaji:'',zh:''},
+  vizAnim:null, stream:null,
+  state:'idle' // idle | recording | done
+};
+
+// 对话语音轨道 [{type:'ai'|'user', text, blob, url}]
+const VOICE_TRACK=[];
+
+function openRecModal(jp,romaji,zh){
+  REC.pending={jp,romaji,zh};
+  REC.blob=null;REC.audioURL=null;REC.chunks=[];REC.state='idle';
+  document.getElementById('recJp').textContent=jp;
+  document.getElementById('recRm').textContent=romaji||'';
+  document.getElementById('recZh').textContent=zh||'';
+  document.getElementById('recStatus').textContent='准备录音';
+  document.getElementById('recMainBtn').className='rec-btn-main idle';
+  document.getElementById('recMainBtn').textContent='🎙';
+  document.getElementById('recResetBtn').style.display='none';
+  document.getElementById('recPlayBtn').style.display='none';
+  document.getElementById('recSendBtn').disabled=true;
+  setVizIdle();
+  document.getElementById('recOverlay').style.display='flex';
+}
+function closeRecModal(){
+  stopRecording();
+  if(REC.vizAnim){cancelAnimationFrame(REC.vizAnim);REC.vizAnim=null;}
+  document.getElementById('recOverlay').style.display='none';
+}
+function setVizIdle(){
+  document.getElementById('recViz').innerHTML='<span style="font-size:11px;color:var(--muted);font-family:\'Space Mono\',monospace">点击录音按钮开始</span>';
+}
+function setVizBars(){
+  const viz=document.getElementById('recViz');
+  viz.innerHTML=Array.from({length:20},(_,i)=>`<div class="rec-bar" id="rb${i}"></div>`).join('');
+}
+
+async function toggleRec(){
+  if(REC.state==='idle'||REC.state==='done'){
+    // start new recording
+    REC.chunks=[];REC.blob=null;REC.audioURL=null;REC.state='recording';
+    try{
+      REC.stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      REC.mediaRecorder=new MediaRecorder(REC.stream);
+      REC.mediaRecorder.ondataavailable=e=>{if(e.data.size>0)REC.chunks.push(e.data);};
+      REC.mediaRecorder.onstop=finalizeRec;
+      REC.mediaRecorder.start(100);
+      document.getElementById('recMainBtn').className='rec-btn-main recording';
+      document.getElementById('recMainBtn').textContent='⏹';
+      document.getElementById('recStatus').textContent='● 录音中…';
+      document.getElementById('recResetBtn').style.display='none';
+      document.getElementById('recPlayBtn').style.display='none';
+      document.getElementById('recSendBtn').disabled=true;
+      setVizBars();
+      animateViz(REC.stream);
+    }catch(e){
+      REC.state='idle';
+      showToast('麦克风权限','请允许浏览器访问麦克风','error');
+    }
+  } else if(REC.state==='recording'){
+    stopRecording();
+  }
+}
+function stopRecording(){
+  if(REC.mediaRecorder&&REC.mediaRecorder.state!=='inactive'){
+    REC.mediaRecorder.stop();
+  }
+  if(REC.stream){REC.stream.getTracks().forEach(t=>t.stop());REC.stream=null;}
+  if(REC.vizAnim){cancelAnimationFrame(REC.vizAnim);REC.vizAnim=null;}
+}
+function finalizeRec(){
+  REC.state='done';
+  REC.blob=new Blob(REC.chunks,{type:'audio/webm'});
+  REC.audioURL=URL.createObjectURL(REC.blob);
+  document.getElementById('recMainBtn').className='rec-btn-main playback';
+  document.getElementById('recMainBtn').textContent='🎙';
+  document.getElementById('recStatus').textContent='录音完成 — 可试听或重录';
+  document.getElementById('recResetBtn').style.display='';
+  document.getElementById('recPlayBtn').style.display='';
+  document.getElementById('recSendBtn').disabled=false;
+  // show waveform placeholder
+  document.getElementById('recViz').innerHTML='<span style="font-size:11px;color:var(--accent);font-family:\'Space Mono\',monospace">✓ 录音完成</span>';
+}
+function resetRec(){
+  stopRecording();
+  REC.state='idle';REC.blob=null;REC.audioURL=null;REC.chunks=[];
+  document.getElementById('recMainBtn').className='rec-btn-main idle';
+  document.getElementById('recMainBtn').textContent='🎙';
+  document.getElementById('recStatus').textContent='准备重新录音';
+  document.getElementById('recResetBtn').style.display='none';
+  document.getElementById('recPlayBtn').style.display='none';
+  document.getElementById('recSendBtn').disabled=true;
+  setVizIdle();
+}
+function playRec(){
+  if(!REC.audioURL)return;
+  const btn=document.getElementById('recPlayBtn');
+  if(REC.audioEl){REC.audioEl.pause();REC.audioEl=null;btn.textContent='▶ 试听';return;}
+  REC.audioEl=new Audio(REC.audioURL);
+  btn.textContent='⏹ 停止';
+  REC.audioEl.play();
+  REC.audioEl.onended=()=>{btn.textContent='▶ 试听';REC.audioEl=null;};
+}
+function animateViz(stream){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const src=ctx.createMediaStreamSource(stream);
+  const analyser=ctx.createAnalyser();analyser.fftSize=64;
+  src.connect(analyser);
+  const data=new Uint8Array(analyser.frequencyBinCount);
+  function draw(){
+    if(REC.state!=='recording')return;
+    REC.vizAnim=requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(data);
+    for(let i=0;i<20;i++){
+      const b=document.getElementById('rb'+i);
+      if(b){const v=data[i]||0;b.style.height=Math.max(4,v/4)+'px';}
+    }
+  }
+  draw();
+}
+
+async function sendRec(){
+  if(!REC.blob)return;
+  const {jp,romaji,zh}=REC.pending;
+  closeRecModal();
+  // store blob for voice track
+  const url=REC.audioURL||URL.createObjectURL(REC.blob);
+  const blobCopy=REC.blob;
+  // add to chat as user message with recording
+  addUserWithRec(jp,url,blobCopy);
+  VOICE_TRACK.push({type:'user',text:jp,blob:blobCopy,url});
+  // send to AI
+  S.msgs.push({role:'user',parts:[{text:jp}]});
+  S.loading=true;document.getElementById('sendBtn').disabled=true;showTyping();
+  document.getElementById('qrArea').innerHTML='';
+  document.getElementById('nextHintPanel').innerHTML='';
+  if(!activeKey()){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;addErrorMsg('APIキーが未設定です','请先配置 API Key。');return;}
+  try{
+    const hist=S.msgs.slice(-14);let start=0;while(start<hist.length&&hist[start].role!=='user')start++;
+    const txt=await callAI(hist.slice(start),'chat');
+    removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;
+    if(txt){const d=parse(txt);addAI(d);S.msgs.push({role:'model',parts:[{text:txt}]});}
+  }catch(e){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;console.error(e);}
+}
+function addUserWithRec(text,url,blob){
+  const area=document.getElementById('msgs'),row=document.createElement('div');
+  row.className='msg-row user';
+  const jpEsc=escA(text);
+  const recId='urec_'+Date.now();
+  row.innerHTML=`<div class="msg-av">你</div><div class="msg-body"><div class="bubble"><div class="jp-line">${esc(text)}</div></div><div class="msg-actions"><button class="tts-btn user-tts" onclick="speak('${jpEsc}',this)">▶ TTS</button><button class="user-rec-btn" id="${recId}" onclick="playUserRec('${recId}','${escA(url)}')">🎙 我的录音</button></div></div>`;
+  area.appendChild(row);area.scrollTop=area.scrollHeight;
+  // store url on element for playback
+  row.dataset.recUrl=url;
+}
+
+// store audio elements per rec button
+const _recPlayers={};
+function playUserRec(btnId,url){
+  const btn=document.getElementById(btnId);
+  if(_recPlayers[btnId]){
+    _recPlayers[btnId].pause();_recPlayers[btnId].currentTime=0;
+    delete _recPlayers[btnId];btn.textContent='🎙 我的录音';btn.classList.remove('playing');
+    return;
+  }
+  const a=new Audio(url);_recPlayers[btnId]=a;
+  btn.textContent='⏹ 停止';btn.classList.add('playing');
+  a.play();
+  a.onended=()=>{delete _recPlayers[btnId];btn.textContent='🎙 我的录音';btn.classList.remove('playing');};
+}
+
+
+// ══════════════════════════════════════════
+//  VOICE DIALOG PLAYBACK & EXPORT
+// ══════════════════════════════════════════
+let _voicePlaying=false;
+
+async function speakTTS(text){
+  return new Promise(resolve=>{
+    if(!('speechSynthesis'in window)){resolve();return;}
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=0.88;u.pitch=1.0;
+    const v=ttsVoices.find(x=>x.lang==='ja-JP')||ttsVoices.find(x=>x.lang.startsWith('ja'));
+    if(v)u.voice=v;
+    u.onend=resolve;u.onerror=resolve;
+    window.speechSynthesis.speak(u);
+  });
+}
+async function playAudioURL(url){
+  return new Promise(resolve=>{
+    const a=new Audio(url);a.onended=resolve;a.onerror=resolve;a.play().catch(resolve);
+  });
+}
+
+async function previewVoiceDialog(){
+  if(_voicePlaying){window.speechSynthesis.cancel();_voicePlaying=false;showToast('已停止','语音对话播放已停止','info');return;}
+  if(!VOICE_TRACK.length){showToast('暂无内容','请先进行对话','info');return;}
+  _voicePlaying=true;
+  showToast('开始播放','正在播放完整语音对话…','info');
+  for(const track of VOICE_TRACK){
+    if(!_voicePlaying)break;
+    if(track.type==='user'&&track.url){
+      await playAudioURL(track.url);
+    }else{
+      // AI or user without recording → TTS
+      await speakTTS(track.text);
+    }
+    await new Promise(r=>setTimeout(r,300));
+  }
+  _voicePlaying=false;
+}
+
+async function exportVoiceDialog(){
+  if(!VOICE_TRACK.length){showToast('暂无内容','请先进行对话','info');return;}
+  showToast('准备中','正在合成语音对话…','info');
+  try{
+    const audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const buffers=[];
+    for(const track of VOICE_TRACK){
+      let buf;
+      if(track.type==='user'&&track.url){
+        // decode user recording
+        const resp=await fetch(track.url);
+        const ab=await resp.arrayBuffer();
+        buf=await audioCtx.decodeAudioData(ab);
+      }else{
+        // TTS → record via MediaStream
+        buf=await ttsToBuffer(audioCtx,track.text);
+      }
+      if(buf)buffers.push(buf);
+      // 300ms silence gap
+      const silence=audioCtx.createBuffer(1,audioCtx.sampleRate*0.3,audioCtx.sampleRate);
+      buffers.push(silence);
+    }
+    if(!buffers.length){showToast('合成失败','无可用音频','error');return;}
+    const merged=mergeBuffers(audioCtx,buffers);
+    const wavBlob=bufferToWav(merged);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(wavBlob);
+    a.download=`日本語会話_${new Date().toISOString().slice(0,10)}.wav`;
+    a.click();
+    showToast('导出成功','完整语音对话已保存','success');
+  }catch(e){
+    console.error(e);
+    showToast('导出失败','浏览器不支持音频合成，请使用 Chrome','error');
+  }
+}
+
+function mergeBuffers(ctx,buffers){
+  const totalLen=buffers.reduce((s,b)=>s+b.length,0);
+  const ch=Math.max(...buffers.map(b=>b.numberOfChannels));
+  const out=ctx.createBuffer(ch,totalLen,ctx.sampleRate);
+  let offset=0;
+  for(const b of buffers){
+    for(let c=0;c<ch;c++){
+      const src=b.numberOfChannels>c?b.getChannelData(c):new Float32Array(b.length);
+      out.getChannelData(c).set(src,offset);
+    }
+    offset+=b.length;
+  }
+  return out;
+}
+
+function bufferToWav(buffer){
+  const numCh=buffer.numberOfChannels,sr=buffer.sampleRate,len=buffer.length;
+  const pcm=new Float32Array(len*numCh);
+  for(let c=0;c<numCh;c++){
+    const ch=buffer.getChannelData(c);
+    for(let i=0;i<len;i++)pcm[i*numCh+c]=ch[i];
+  }
+  const int16=new Int16Array(pcm.length);
+  for(let i=0;i<pcm.length;i++)int16[i]=Math.max(-32768,Math.min(32767,pcm[i]*32767));
+  const ab=int16.buffer;
+  const wavBuf=new ArrayBuffer(44+ab.byteLength);
+  const view=new DataView(wavBuf);
+  function ws(off,str){for(let i=0;i<str.length;i++)view.setUint8(off+i,str.charCodeAt(i));}
+  ws(0,'RIFF');view.setUint32(4,36+ab.byteLength,true);ws(8,'WAVE');
+  ws(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true);view.setUint32(24,sr,true);
+  view.setUint32(28,sr*numCh*2,true);view.setUint16(32,numCh*2,true);view.setUint16(34,16,true);
+  ws(36,'data');view.setUint32(40,ab.byteLength,true);
+  new Uint8Array(wavBuf).set(new Uint8Array(ab),44);
+  return new Blob([wavBuf],{type:'audio/wav'});
+}
+
+// TTS to AudioBuffer (record SpeechSynthesis via MediaStreamDestination)
+function ttsToBuffer(audioCtx,text){
+  return new Promise(resolve=>{
+    try{
+      const dest=audioCtx.createMediaStreamDestination();
+      const mr=new MediaRecorder(dest.stream);
+      const chunks=[];
+      mr.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+      mr.onstop=async()=>{
+        const blob=new Blob(chunks,{type:'audio/webm'});
+        try{
+          const ab=await blob.arrayBuffer();
+          const buf=await audioCtx.decodeAudioData(ab);
+          resolve(buf);
+        }catch(e){resolve(null);}
+      };
+      // We can't easily pipe SpeechSynthesis into AudioContext in most browsers
+      // Fallback: create silence buffer of estimated duration (~150ms per char)
+      const dur=Math.max(1,text.length*0.15);
+      const silence=audioCtx.createBuffer(1,Math.floor(audioCtx.sampleRate*dur),audioCtx.sampleRate);
+      // Note: real TTS audio is played via Web Speech API separately during preview
+      // For export we embed a note silence block (Web Speech API can't be captured easily)
+      resolve(silence);
+    }catch(e){resolve(null);}
+  });
+}
+
+renderCats();
+renderScenes();
+</script>
+</body>
+</html>
