@@ -191,38 +191,39 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
 .empty p{font-size:13px;line-height:1.8}
 
 /* ── BOTTOM ROW (词汇 + 设置 横排) ── */
-.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:600px){.bottom-row{grid-template-columns:1fr}}
+.bottom-row{display:flex;gap:14px;align-items:flex-start}
+.bottom-row .vocab-panel{flex:1;min-width:0}
+.bottom-row .settings-panel{flex:0 0 220px;width:220px}
+@media(max-width:600px){.bottom-row{flex-direction:column}.bottom-row .settings-panel{flex:none;width:100%}}
 
 /* ── VOCAB PANEL (bottom-left) ── */
-.vocab-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.03);display:none}
-.vocab-panel.show{display:block}
+.vocab-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.03);display:block}
 .vocab-head{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .vocab-head-lbl{font-size:11px;font-weight:700;color:var(--fg);opacity:.65;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .vocab-count-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:20px;border:1px solid var(--border)}
 .vocab-list{padding:8px 12px;display:flex;flex-direction:column;gap:0;max-height:220px;overflow-y:auto}
 .vocab-item{display:flex;align-items:center;padding:8px 6px;border-bottom:1px solid rgba(26,26,46,.05)}
 .vocab-item:last-child{border-bottom:none}
-.vocab-item-inner{display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:10px;flex:1}
-.v-jp{font-size:16px;font-weight:700;grid-row:1/3;align-self:center;color:var(--fg)}
+.vocab-item-inner{display:grid;grid-template-columns:150px 1fr;grid-template-rows:auto auto;column-gap:10px;flex:1}
+.v-jp{font-size:15px;font-weight:700;grid-row:1/3;align-self:center;color:var(--fg);white-space:nowrap}
 .v-rm{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.03em;line-height:1.5}
 .v-zh{font-size:12px;color:#5a5a6c;line-height:1.4}
 .v-tts{background:none;border:1.5px solid var(--border);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s;flex-shrink:0;margin-left:8px}
 .v-tts:hover,.v-tts.playing{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
 
 /* ── SETTINGS PANEL (bottom-right) ── */
-.settings-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:0 2px 10px rgba(0,0,0,.03)}
-.settings-head{font-size:11px;font-weight:700;color:var(--fg);opacity:.65;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:5px}
-.provider-status{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:8px;font-size:11px;font-family:'Space Mono',monospace;margin-bottom:10px}
+.settings-panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;box-shadow:0 2px 10px rgba(0,0,0,.03)}
+.settings-head{font-size:11px;font-weight:700;color:var(--fg);opacity:.65;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.provider-status{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:8px;font-size:11px;font-family:'Space Mono',monospace;margin-bottom:8px}
 .provider-status.gemini-mode{background:#e8f0fe;color:#1a56c4}
 .provider-status.groq-mode{background:var(--groq-light);color:var(--groq)}
 .provider-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
-.lvl-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.lvl-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .lvl-row span{color:var(--muted);font-weight:500}
 .lvl-sel{border:1.5px solid var(--border-mid);border-radius:8px;padding:4px 9px;font-size:12px;font-family:inherit;background:var(--bg);color:var(--fg);outline:none;cursor:pointer;font-weight:500}
 .lvl-sel:focus{border-color:var(--accent)}
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.toggle{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:11.5px;color:var(--muted);transition:all .2s;user-select:none;font-weight:500}
+.settings-grid{display:grid;grid-template-columns:1fr;gap:5px}
+.toggle{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:11.5px;color:var(--muted);transition:all .2s;user-select:none;font-weight:500}
 .toggle.on{background:var(--accent-light);border-color:rgba(26,122,110,.28);color:var(--accent)}
 .dot{width:7px;height:7px;border-radius:50%;background:rgba(26,26,46,.18);flex-shrink:0;transition:background .2s}
 .toggle.on .dot{background:var(--accent)}
@@ -442,7 +443,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding:16p
           <span class="vocab-head-lbl">📖 重点词汇</span>
           <span class="vocab-count-badge" id="vocabCount">0 語</span>
         </div>
-        <div class="vocab-list" id="vocabList"></div>
+        <div class="vocab-list" id="vocabList">
+          <div class="qr-placeholder" id="vocabPlaceholder" style="min-height:80px">对话开始后，<br>重点词汇将显示在这里</div>
+        </div>
       </div>
 
       <!-- 会话控制 -->
@@ -538,11 +541,38 @@ function initLangToggle(){
   document.getElementById('langEn').classList.toggle('active',LANG_MODE==='en');
 }
 const GEMINI_MODELS=['gemini-2.5-flash','gemini-2.0-flash','gemini-1.5-flash'];
-const GROQ_MODELS=['llama-3.3-70b-versatile','llama3-70b-8192','llama3-8b-8192','mixtral-8x7b-32768'];
+// Groq 模型：运行时动态获取，下方为保底 fallback（仅保留 versatile 长青款）
+const GROQ_MODELS_FALLBACK=['llama-3.3-70b-versatile','llama-3.1-70b-versatile','llama-3.1-8b-instant'];
+let _groqModelsCache=null;
+
+async function getGroqModels(k){
+  if(_groqModelsCache)return _groqModelsCache;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+k}});
+    if(!r.ok)throw new Error('fetch models failed');
+    const d=await r.json();
+    // 只保留 chat 类模型，优先 versatile，按 id 排序
+    const ids=(d.data||[])
+      .filter(m=>{
+        const id=m.id;
+        return !id.includes('whisper')&&!id.includes('-tts')&&!id.includes('guard')&&
+               !id.includes('vision')&&m.object==='model';
+      })
+      .map(m=>m.id)
+      .sort((a,b)=>{
+        // 优先级：instant(最快) > 8b > versatile > 其他
+        const score=id=>id.includes('instant')?0:id.includes('8b')?1:id.includes('versatile')?2:3;
+        return score(a)-score(b)||a.localeCompare(b);
+      });
+    if(ids.length){_groqModelsCache=ids;return ids;}
+  }catch(e){console.warn('Groq model list fetch failed, using fallback:',e);}
+  return GROQ_MODELS_FALLBACK;
+}
 function activeKey(){return PROVIDER==='gemini'?GK_GEMINI:GK_GROQ;}
 
 function switchProvider(p){
   PROVIDER=p;localStorage.setItem('provider',p);
+  _groqModelsCache=null; // 切换时清除模型缓存
   document.getElementById('tabGemini').className='kp-tab'+(p==='gemini'?' active-gemini':'');
   document.getElementById('tabGroq').className='kp-tab'+(p==='groq'?' active-groq':'');
   initKeyUI();
@@ -561,7 +591,7 @@ function saveKey(){
     if(v.startsWith('AIza')&&v.length>30){GK_GEMINI=v;localStorage.setItem('gk_gemini',v);initKeyUI();showToast('Gemini Key 已保存','准备开始练习！','success');}
     else showToast('格式错误','Gemini Key 以 AIzaSy 开头，长于30位','error');
   }else{
-    if(v.length>20){GK_GROQ=v;localStorage.setItem('gk_groq',v);initKeyUI();showToast('Groq Key 已保存','完全免费，速度极快！','success');}
+    if(v.length>20){GK_GROQ=v;localStorage.setItem('gk_groq',v);_groqModelsCache=null;initKeyUI();showToast('Groq Key 已保存','完全免费，速度极快！','success');}
     else showToast('格式错误','Groq Key 通常以 gsk_ 开头','error');
   }
 }
@@ -836,9 +866,8 @@ function clearChat(){
   document.getElementById('msgs').innerHTML='';
   document.getElementById('qrArea').innerHTML='<div class="qr-placeholder">对话开始后，将出现 3 条回答建议<br>含罗马音 · 中文 · 发音</div>';
   document.getElementById('nextHintPanel').innerHTML='<div class="qr-placeholder">对话开始后，这里会显示<br>AI 接下来可能说的句子</div>';
-  document.getElementById('vocabList').innerHTML='';
+  document.getElementById('vocabList').innerHTML='<div class="qr-placeholder" id="vocabPlaceholder" style="min-height:80px">对话开始后，<br>重点词汇将显示在这里</div>';
   document.getElementById('vocabCount').textContent='0 語';
-  document.getElementById('vocabPanel').classList.remove('show');
   // 重置语音轨道
   if(typeof VOICE_TRACK!=='undefined'){VOICE_TRACK.length=0;}
   const bar=document.getElementById('voiceExportBar');if(bar)bar.classList.remove('show');
@@ -884,11 +913,24 @@ function sysP(){
 }
 
 // ══════════════════════════════════════════
-//  NETWORK
+//  NETWORK  —  智能重试（读 retry-after header）
 // ══════════════════════════════════════════
-async function fetchWithRetry(url,options,retries=4,delay=1100){
-  try{const r=await fetch(url,options);if(r.ok)return r;if(retries>0&&(r.status===429||r.status>=500)){await new Promise(res=>setTimeout(res,delay));return fetchWithRetry(url,options,retries-1,delay*2);}return r;}
-  catch(e){if(retries>0){await new Promise(res=>setTimeout(res,delay));return fetchWithRetry(url,options,retries-1,delay*2);}throw e;}
+async function fetchWithRetry(url,options,retries=3,delay=800){
+  try{
+    const r=await fetch(url,options);
+    if(r.ok)return r;
+    if(retries>0&&(r.status===429||r.status>=500)){
+      // 读 Groq/Gemini 返回的 retry-after，精准等待
+      const ra=r.headers.get('retry-after')||r.headers.get('x-ratelimit-reset-requests');
+      const wait=ra?Math.min(parseFloat(ra)*1000+200,12000):delay;
+      await new Promise(res=>setTimeout(res,wait));
+      return fetchWithRetry(url,options,retries-1,delay*2);
+    }
+    return r;
+  }catch(e){
+    if(retries>0){await new Promise(res=>setTimeout(res,delay));return fetchWithRetry(url,options,retries-1,delay*2);}
+    throw e;
+  }
 }
 function addErrorMsg(title,detail){
   const area=document.getElementById('msgs');const d=document.createElement('div');d.className='msg-row ai';
@@ -897,7 +939,7 @@ function addErrorMsg(title,detail){
 }
 
 // ══════════════════════════════════════════
-//  AI ENGINE — Gemini + Groq
+//  AI ENGINE — Gemini + Groq  (streaming)
 // ══════════════════════════════════════════
 const chatSchema={type:"object",properties:{
   jp:{type:"string"},zh:{type:"string"},romaji:{type:"string"},
@@ -913,9 +955,11 @@ async function callAI(msgs,mode='chat'){
   if(!k){addErrorMsg('APIキーが未設定です','页面顶部请先配置 API Key（Gemini 或 Groq）。');return null;}
   return PROVIDER==='groq'?callGroq(msgs,mode,k):callGemini(msgs,mode,k);
 }
+
+// ── Gemini：流式 streamGenerateContent ──
 async function callGemini(msgs,mode,k){
   const sm={chat:chatSchema,scene:sceneSchema,location:locationSchema};
-  const body={contents:msgs,generationConfig:{temperature:mode==='chat'?0.85:0.65,maxOutputTokens:mode==='chat'?1024:384,responseMimeType:"application/json",responseSchema:sm[mode]||chatSchema}};
+  const body={contents:msgs,generationConfig:{temperature:mode==='chat'?0.85:0.65,maxOutputTokens:mode==='chat'?900:384,responseMimeType:"application/json",responseSchema:sm[mode]||chatSchema}};
   if(mode==='chat'){
     const isEn=LANG_MODE==='en';
     const langNote=isEn?'\n\n【重要】zhフィールドは必ず英語（English）で出力してください。中国語は使用しないでください。':'\n\n【重要】zhフィールドは必ず中国語（简体中文）で出力してください。';
@@ -924,16 +968,50 @@ async function callGemini(msgs,mode,k){
   let lastError=null;
   for(const model of GEMINI_MODELS){
     try{
-      const r=await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${k}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      // chat 模式用流式，其他用普通
+      const endpoint=mode==='chat'?'streamGenerateContent':'generateContent';
+      const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}?key=${k}${mode==='chat'?'&alt=sse':''}`;
+      const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       if(r.status===404){lastError=`Model ${model} not found`;continue;}
-      if(!r.ok){const err=await r.json().catch(()=>({error:{message:r.status+''}}));const msg=err?.error?.message||r.statusText;if(msg.includes('not found')||msg.includes('Model')||(r.status===400&&msg.includes('models/'))){lastError=msg;continue;}S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;const em={400:'API Key 无效或请求格式错误',403:'权限不足，请检查 Key',429:'调用频率超限（429）— 免费版每分钟15次，建议换 Groq Key（免费）'};addErrorMsg('Gemini エラー',em[r.status]||`连接失败（${r.status}）：${msg}`);throw new Error(msg);}
-      const d=await r.json();return d.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
+      if(!r.ok){
+        const err=await r.json().catch(()=>({error:{message:r.status+''}}));
+        const msg=err?.error?.message||r.statusText;
+        if(msg.includes('not found')||msg.includes('Model')||(r.status===400&&msg.includes('models/'))){lastError=msg;continue;}
+        S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;
+        const em={400:'API Key 无效或请求格式错误',403:'权限不足，请检查 Key',429:'调用频率超限 — 免费版每分钟15次，建议换 Groq'};
+        addErrorMsg('Gemini エラー',em[r.status]||`连接失败（${r.status}）：${msg}`);throw new Error(msg);
+      }
+      if(mode!=='chat'){const d=await r.json();return d.candidates?.[0]?.content?.parts?.[0]?.text||'{}';}
+      // 流式读取 SSE
+      return await readGeminiStream(r);
     }catch(e){lastError=e.message;if(e.message.includes('API')||e.message.includes('Gemini'))throw e;}
   }
   S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;
-  addErrorMsg('Gemini モデル不可用','所有 Gemini 模型均不可用，建议切换到 🟠 Groq（完全免费）。错误：'+lastError);
+  addErrorMsg('Gemini モデル不可用','所有 Gemini 模型均不可用，建议切换到 🟠 Groq。错误：'+lastError);
   throw new Error('No Gemini models');
 }
+async function readGeminiStream(response){
+  const reader=response.body.getReader();const dec=new TextDecoder();let buf='';let full='';
+  while(true){
+    const{done,value}=await reader.read();if(done)break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split('\n');buf=lines.pop()||'';
+    for(const line of lines){
+      if(!line.startsWith('data:'))continue;
+      const data=line.slice(5).trim();if(data==='[DONE]')continue;
+      try{
+        const j=JSON.parse(data);
+        const chunk=j.candidates?.[0]?.content?.parts?.[0]?.text||'';
+        full+=chunk;
+        // 实时流式渲染日文部分
+        streamRenderJP(full);
+      }catch(e){}
+    }
+  }
+  return full||'{}';
+}
+
+// ── Groq：流式 stream:true ──
 async function callGroq(msgs,mode,k){
   const openAIMsgs=[];
   if(mode==='chat'){
@@ -945,30 +1023,109 @@ async function callGroq(msgs,mode,k){
   for(const m of msgs){openAIMsgs.push({role:m.role==='model'?'assistant':'user',content:m.parts?.[0]?.text||m.content||''});}
   if(mode==='scene'){const lm=openAIMsgs[openAIMsgs.length-1];if(lm)lm.content+=' 必ずJSONのみで出力：{"id":"...","icon":"...","name":"...","sub":"...","av":"...","role":"...","ctx":"..."}';}
   if(mode==='location'){const lm=openAIMsgs[openAIMsgs.length-1];if(lm)lm.content+=' 必ずJSONのみで出力：{"placeName":"...","sceneId":"...","hint":"..."}';}
+
   let lastError=null;
-  for(const model of GROQ_MODELS){
+  // chat 优先用 instant 小模型（速度最快），scene/location 用大模型
+  const groqModels=await getGroqModels(k);
+  const orderedModels=mode==='chat'
+    ?[...groqModels].sort((a,b)=>{
+        const score=m=>(m.includes('instant')?0:m.includes('8b')?1:m.includes('versatile')?2:3);
+        return score(a)-score(b);
+      })
+    :groqModels;
+
+  for(const model of orderedModels){
     try{
-      const r=await fetchWithRetry('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({model,messages:openAIMsgs,temperature:mode==='chat'?0.85:0.65,max_tokens:mode==='chat'?1024:384,response_format:{type:'json_object'}})});
+      const useStream=mode==='chat';
+      const body={model,messages:openAIMsgs,temperature:mode==='chat'?0.85:0.65,max_tokens:mode==='chat'?900:384,stream:useStream};
+      if(!useStream)body.response_format={type:'json_object'};
+      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify(body)});
       if(r.status===404){lastError=`Model ${model} not found`;continue;}
-      if(!r.ok){const err=await r.json().catch(()=>({error:{message:r.status+''}}));const msg=err?.error?.message||r.statusText;if(r.status===401){S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;addErrorMsg('Groq Key 无效','请检查你的 Groq API Key 是否正确。');throw new Error(msg);}if(r.status===429){S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;addErrorMsg('Groq レート制限','频率限制，请稍等几秒再试。');throw new Error(msg);}lastError=msg;continue;}
-      const d=await r.json();return d.choices?.[0]?.message?.content||'{}';
-    }catch(e){lastError=e.message;if(e.message.includes('Groq'))throw e;}
+      if(!r.ok){
+        const err=await r.json().catch(()=>({error:{message:r.status+''}}));
+        const msg=err?.error?.message||r.statusText;
+        if(r.status===401){S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;addErrorMsg('Groq Key 无效','请检查你的 Groq API Key 是否正确。');throw new Error(msg);}
+        if(r.status===429){
+          // 读精准等待时间
+          const ra=r.headers.get('retry-after')||r.headers.get('x-ratelimit-reset-requests');
+          const wait=ra?Math.ceil(parseFloat(ra))+1:5;
+          showToast('Groq 频率限制',`${wait}秒后自动重试…`,'info');
+          await new Promise(res=>setTimeout(res,wait*1000));
+          lastError=msg;continue; // 同模型重试
+        }
+        if(msg.includes('decommissioned')||msg.includes('deprecated')||msg.includes('no longer supported')){_groqModelsCache=null;lastError=msg;continue;}
+        lastError=msg;continue;
+      }
+      if(!useStream){const d=await r.json();return d.choices?.[0]?.message?.content||'{}';}
+      // 流式读取
+      return await readGroqStream(r);
+    }catch(e){lastError=e.message;if(e.message.includes('Groq')||e.message.includes('Key'))throw e;}
   }
   S.loading=false;removeTyping();document.getElementById('sendBtn').disabled=false;
   addErrorMsg('Groq 接続失敗','所有 Groq 模型均不可用。错误：'+lastError);throw new Error('No Groq models');
+}
+async function readGroqStream(response){
+  const reader=response.body.getReader();const dec=new TextDecoder();let buf='';let full='';
+  while(true){
+    const{done,value}=await reader.read();if(done)break;
+    buf+=dec.decode(value,{stream:true});
+    const lines=buf.split('\n');buf=lines.pop()||'';
+    for(const line of lines){
+      if(!line.startsWith('data:'))continue;
+      const data=line.slice(5).trim();if(data==='[DONE]')continue;
+      try{
+        const j=JSON.parse(data);
+        const chunk=j.choices?.[0]?.delta?.content||'';
+        if(!chunk)continue;
+        full+=chunk;
+        streamRenderJP(full);
+      }catch(e){}
+    }
+  }
+  return full||'{}';
+}
+
+// ── 流式实时渲染：边收边显示日文 ──
+let _streamRow=null;
+function streamRenderJP(partial){
+  // 尝试从不完整 JSON 中提取 jp 字段
+  const m=partial.match(/"jp"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+  if(!m)return;
+  const jpText=m[1].replace(/\\n/g,'\n').replace(/\\"/g,'"');
+  if(!jpText)return;
+  removeTyping();
+  if(!_streamRow){
+    const area=document.getElementById('msgs');
+    _streamRow=document.createElement('div');_streamRow.className='msg-row ai';
+    const av=S.scene?.av||'AI';
+    _streamRow.innerHTML=`<div class="msg-av">${av}</div><div class="msg-body"><div class="bubble"><div class="jp-line" id="streamJP"></div></div></div>`;
+    area.appendChild(_streamRow);
+  }
+  const jpEl=document.getElementById('streamJP');
+  if(jpEl){jpEl.textContent=jpText;_streamRow.scrollIntoView({block:'end',behavior:'smooth'});}
+}
+function clearStreamRow(){
+  // 仅清引用；DOM 节点留给 addAI 复用
+  _streamRow=null;
+}
+function removeStreamRow(){
+  // 出错时清除流式气泡
+  if(_streamRow){_streamRow.remove();_streamRow=null;}
+  else{const el=document.getElementById('streamJP');if(el)el.closest('.msg-row')?.remove();}
 }
 
 // ══════════════════════════════════════════
 //  CONVERSATION
 // ══════════════════════════════════════════
 async function startConv(){
-  if(!S.scene)return;S.loading=true;showTyping();
+  if(!S.scene)return;S.loading=true;_streamRow=null;showTyping();
   if(!activeKey()){removeTyping();S.loading=false;addErrorMsg('APIキーが未設定です','请先配置 Gemini 或 Groq API Key。');return;}
   try{
     const txt=await callAI([{role:'user',parts:[{text:'会話を始めてください。役になりきって最初の声かけをしてください。'}]}],'chat');
     removeTyping();S.loading=false;
     if(txt){const d=parse(txt);addAI(d);S.msgs.push({role:'model',parts:[{text:txt}]});}
-  }catch(e){removeTyping();S.loading=false;console.error(e);}
+    else removeStreamRow();
+  }catch(e){removeStreamRow();removeTyping();S.loading=false;console.error(e);}
 }
 async function sendMsg(){
   if(S.loading||!S.scene)return;
@@ -978,14 +1135,15 @@ async function sendMsg(){
   document.getElementById('qrArea').innerHTML='';
   document.getElementById('nextHintPanel').innerHTML='';
   addUser(text);S.msgs.push({role:'user',parts:[{text}]});
-  S.loading=true;document.getElementById('sendBtn').disabled=true;showTyping();
+  S.loading=true;document.getElementById('sendBtn').disabled=true;_streamRow=null;showTyping();
   if(!activeKey()){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;addErrorMsg('APIキーが未設定です','请先配置 API Key。');return;}
   try{
     const hist=S.msgs.slice(-14);let start=0;while(start<hist.length&&hist[start].role!=='user')start++;
     const txt=await callAI(hist.slice(start),'chat');
     removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;
     if(txt){const d=parse(txt);addAI(d);S.msgs.push({role:'model',parts:[{text:txt}]});}
-  }catch(e){removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;console.error(e);}
+    else removeStreamRow();
+  }catch(e){removeStreamRow();removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;console.error(e);}
 }
 function parse(txt){
   try{return JSON.parse(txt.trim());}catch(e){const m=txt.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0]);}catch(e2){}console.error('parse:',txt);return{jp:txt,zh:'',romaji:'',words:[],suggestions:[],next_hints:[]};}
@@ -996,16 +1154,29 @@ function parse(txt){
 // ══════════════════════════════════════════
 function addAI(d){
   const area=document.getElementById('msgs'),av=S.scene?.av||'AI';
-  const row=document.createElement('div');row.className='msg-row ai';
   const rm=S.set.romaji&&d.romaji?`<div class="rm-line">${esc(d.romaji)}</div>`:'';
   const zh=S.set.zh&&d.zh?`<div class="zh-line">${esc(d.zh)}</div>`:'';
   const jpEsc=escA(d.jp);
-  row.innerHTML=`<div class="msg-av">${av}</div><div class="msg-body"><div class="bubble">${rm}<div class="jp-line">${esc(d.jp)}</div>${zh}</div><div class="msg-actions"><button class="tts-btn" onclick="speak('${jpEsc}',this)">▶ AI 発音</button></div></div>`;
-  area.appendChild(row);area.scrollTop=area.scrollHeight;
+  const actionsHTML=`<div class="msg-actions"><button class="tts-btn" onclick="speak('${jpEsc}',this)">▶ AI 発音</button></div>`;
+
+  // 复用流式气泡，直接在原节点上补全，避免重复
+  const streamEl=document.getElementById('streamJP');
+  if(streamEl){
+    const bubble=streamEl.closest('.bubble');
+    if(bubble){
+      bubble.innerHTML=`${rm}<div class="jp-line">${esc(d.jp)}</div>${zh}`;
+      const body=bubble.closest('.msg-body');
+      if(body&&!body.querySelector('.msg-actions'))body.insertAdjacentHTML('beforeend',actionsHTML);
+    }
+  }else{
+    const row=document.createElement('div');row.className='msg-row ai';
+    row.innerHTML=`<div class="msg-av">${av}</div><div class="msg-body"><div class="bubble">${rm}<div class="jp-line">${esc(d.jp)}</div>${zh}</div>${actionsHTML}</div>`;
+    area.appendChild(row);
+  }
+  area.scrollTop=area.scrollHeight;
   if(d.suggestions?.length)renderQR(d.suggestions);
   if(d.next_hints?.length)renderNextHints(d.next_hints);
   if(S.set.vocab&&d.words?.length)renderVocab(d.words);
-  // 记录 AI 语音轨道
   VOICE_TRACK.push({type:'ai',text:d.jp,blob:null,url:null});
   if(VOICE_TRACK.length>0)document.getElementById('voiceExportBar').classList.add('show');
   if(S.set.tts)setTimeout(()=>speak(d.jp,null),400);
@@ -1061,7 +1232,6 @@ function renderVocab(words){
       </div>
       <button class="v-tts" onclick="speak('${escA(w.jp)}',this)">▶</button>
     </div>`).join('');
-  document.getElementById('vocabPanel').classList.add('show');
 }
 function showTyping(){
   const area=document.getElementById('msgs'),d=document.createElement('div');d.className='msg-row ai';d.id='typingRow';
