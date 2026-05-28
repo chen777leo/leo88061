@@ -893,30 +893,20 @@ function randomScene(){
 function sysP(){
   const sc=S.scene,lv=document.getElementById('lvlSel').value;
   const isEn=LANG_MODE==='en';
-  const tl=isEn?'English':'中国語(简体中文)';
-  const tlEx=isEn?'(e.g. How are you?)':'(例:你好吗？)';
-  const tlNote=isEn?'IMPORTANT: Every zh field must be English translation.':'重要: zh欄は必ず中国語翻訳を入れること。';
+  const tl=isEn?'English':'Chinese(简体中文)';
+  const tlEx=isEn?'e.g. How are you?':'例:你好吗？';
+  const tlNote=isEn?'IMPORTANT: Every zh field must be English.':'IMPORTANT: Every zh field must be Chinese(简体中文).';
+  const jsonEx='{"jp":"...","zh":"...","romaji":"...","words":[{"jp":"w","reading":"r","zh":"m"}],'
+    +'"suggestions":[{"jp":"s1","romaji":"r1","zh":"m1"},{"jp":"s2","romaji":"r2","zh":"m2"},{"jp":"s3","romaji":"r3","zh":"m3"}],'
+    +'"next_hints":[{"jp":"h1","romaji":"r1","zh":"m1"},{"jp":"h2","romaji":"r2","zh":"m2"}]}';
   return `You are a Japanese conversation practice AI.
 Role: ${sc.role}. Scene: ${sc.name}. Context: ${sc.ctx}. Level: ${lv}.
 ${tlNote}
-
-Output ONLY valid JSON, no explanation:
-{
-  "jp": "<AI's Japanese response>",
-  "zh": "<${tl} translation of jp> ${tlEx}",
-  "romaji": "<Hepburn romanization of jp>",
-  "words": [{"jp":"<word>","reading":"<hiragana>","zh":"<${tl} meaning>"}],
-  "suggestions": [
-    {"jp":"<natural reply 1>","romaji":"<romaji 1>","zh":"<${tl} meaning 1>"},
-    {"jp":"<natural reply 2>","romaji":"<romaji 2>","zh":"<${tl} meaning 2>"},
-    {"jp":"<natural reply 3>","romaji":"<romaji 3>","zh":"<${tl} meaning 3>"}
-  ],
-  "next_hints": [
-    {"jp":"<likely AI follow-up 1>","romaji":"<romaji 1>","zh":"<${tl} meaning 1>"},
-    {"jp":"<likely AI follow-up 2>","romaji":"<romaji 2>","zh":"<${tl} meaning 2>"}
-  ]
-}
-Rules: words max 3 items. All romaji and zh fields are REQUIRED. Never leave zh empty.`;
+Output ONLY this JSON (fill every field, no empty strings, no extra text):
+${jsonEx}
+- jp: AI Japanese reply. zh: ${tl} translation (${tlEx}). romaji: Hepburn romanization.
+- words: up to 3 key vocab. suggestions: 3 natural user replies. next_hints: 2 likely AI follow-ups.
+- ALL romaji and zh fields are REQUIRED. Never output anything outside the JSON object.`;
 }
 
 // ══════════════════════════════════════════
@@ -1157,19 +1147,45 @@ async function sendMsg(){
   }catch(e){removeStreamRow();removeTyping();S.loading=false;document.getElementById('sendBtn').disabled=false;console.error(e);}
 }
 function parse(txt){
-  try{return JSON.parse(txt.trim());}catch(e){const m=txt.match(/\{[\s\S]*\}/);if(m)try{return JSON.parse(m[0]);}catch(e2){}console.error('parse:',txt);return{jp:txt,zh:'',romaji:'',words:[],suggestions:[],next_hints:[]};}
+  if(!txt)return null;
+  const raw=txt.trim();
+  // 1. 直接解析
+  try{const d=JSON.parse(raw);if(d&&d.jp)return d;}catch(e){}
+  // 2. 提取最外层 {} 
+  try{
+    const s=raw.indexOf('{'),e=raw.lastIndexOf('}');
+    if(s>=0&&e>s){const d=JSON.parse(raw.slice(s,e+1));if(d&&d.jp)return d;}
+  }catch(e){}
+  // 3. 去掉 markdown 代码块
+  try{
+    const stripped=raw.replace(/```json|```/gi,'').trim();
+    const d=JSON.parse(stripped);if(d&&d.jp)return d;
+  }catch(e){}
+  // 4. 从文本中直接抠出 jp 字段值作为返答（兜底）
+  const jpMatch=raw.match(/"jp"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+  if(jpMatch){
+    const jp=jpMatch[1].replace(/\\n/g,'\n').replace(/\\"/g,'"');
+    const zhMatch=raw.match(/"zh"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    const rmMatch=raw.match(/"romaji"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    const zh=zhMatch?zhMatch[1]:'';
+    const romaji=rmMatch?rmMatch[1]:'';
+    return{jp,zh,romaji,words:[],suggestions:[],next_hints:[]};
+  }
+  // 5. 真的是纯文本回复
+  if(raw.length>0&&!raw.includes('"jp"'))return{jp:raw,zh:'',romaji:'',words:[],suggestions:[],next_hints:[]};
+  return null;
 }
 
 // ══════════════════════════════════════════
 //  RENDERING
 // ══════════════════════════════════════════
 function addAI(d){
+  if(!d||!d.jp){removeStreamRow();return;} // jp 为空则移除气泡不渲染
   const area=document.getElementById('msgs'),av=S.scene?.av||'AI';
   const rm=S.set.romaji&&d.romaji?`<div class="rm-line">${esc(d.romaji)}</div>`:'';
   const zh=S.set.zh&&d.zh?`<div class="zh-line">${esc(d.zh)}</div>`:'';
   const jpEsc=escA(d.jp);
   const actionsHTML=`<div class="msg-actions"><button class="tts-btn" onclick="speak('${jpEsc}',this)">▶ AI 発音</button></div>`;
-
   // 复用流式气泡，直接在原节点上补全，避免重复
   const streamEl=document.getElementById('streamJP');
   if(streamEl){
